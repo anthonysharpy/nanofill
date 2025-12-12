@@ -7,8 +7,32 @@
 namespace nanofill::tradingengine {
 
 using events::Event;
+using events::EventType;
 
 class TradingEngine {
+public:
+    TradingEngine(const int price_spread) noexcept;
+
+    [[gnu::always_inline]] inline
+    void process_event(const Event event) noexcept {
+        switch (event.type) {
+            case EventType::Submission:
+                process_order_added_event(event);
+                break;
+            case EventType::Cancellation:
+            case EventType::Deletion:
+            case EventType::ExecutionVisible:
+                process_order_removed_event(event);
+                break;
+            case EventType::ExecutionHidden:
+                // Processing would lead to strange results since this order was never recorded.
+                return;
+        }    
+
+        update_position();
+    }
+
+private:
     // The last execution order we've seen.
     Event last_execution_order;
     // Sum of the value of all orders in 10,000ths of a dollar. This includes both sell and buy orders.
@@ -30,10 +54,6 @@ class TradingEngine {
     void update_position() noexcept;
     void generate_intent(const std::int32_t amount, const std::uint32_t price) noexcept;
     void cancel_all_orders() noexcept;
-
-public:
-    TradingEngine(const int price_spread) noexcept;
-    void process_event(const Event event) noexcept;
     void process_order_removed_event(const Event event) noexcept;
     void process_order_added_event(const Event event) noexcept;
 };

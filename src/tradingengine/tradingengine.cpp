@@ -4,8 +4,6 @@
 
 namespace nanofill::tradingengine {
 
-using events::EventType;
-
 TradingEngine::TradingEngine(const int price_spread) noexcept {
     this->price_spread = price_spread;
 }
@@ -36,24 +34,6 @@ void TradingEngine::process_order_added_event(const Event event) noexcept {
     }
 
     average_share_price = total_market_price / market_shares;
-}
-
-void TradingEngine::process_event(const Event event) noexcept {
-    switch (event.type) {
-        case EventType::Cancellation:
-        case EventType::Deletion:
-        case EventType::ExecutionVisible:
-            process_order_removed_event(event);
-            break;
-        case EventType::Submission:
-            process_order_added_event(event);
-            break;
-        case EventType::ExecutionHidden:
-            // Processing would lead to strange results since this order was never recorded.
-            return;
-    }    
-
-    update_position();
 }
 
 // The market value has changed. Update our position.
