@@ -4,7 +4,6 @@
 namespace nanofill::orderbook {
 
 using events::Event;
-using events::EventType;
 
 OrderBook::OrderBook() noexcept {
     levels_orders.resize(order_book_size);
@@ -15,28 +14,6 @@ OrderBook::OrderBook() noexcept {
         levels_orders[i].reserve(50);
     }
 }
-
-// Returns true if the event was actioned, false if not.
-bool OrderBook::process_event(const Event event) noexcept {
-    // Try and order these from most to least common.
-    switch (event.type) {
-        case EventType::Submission:
-            process_submission_event(event);
-            return true;
-        case EventType::Cancellation:
-            return process_cancellation_event(event);
-        case EventType::ExecutionVisible:
-            return process_visible_execution_event(event);
-        case EventType::Deletion:
-            return process_deletion_event(event);
-        case EventType::ExecutionHidden:
-            // A hidden order was executed. This means we never had it in our order book,
-            // and so there is no real order to process.
-            return false;
-    }
-
-    return false;
-}
     
 // Insert an order into the order book.
 void OrderBook::insert_order(const Event event) noexcept {
@@ -46,6 +23,7 @@ void OrderBook::insert_order(const Event event) noexcept {
 }
 
 // Same as remove_order, except slightly faster because we already know the order's index.
+[[gnu::always_inline]] inline
 void OrderBook::remove_order_with_index(const Event event, const unsigned int index) noexcept {
     levels_last_modified[event.price] = event.time;
     levels_size[event.price] -= event.size;
@@ -55,6 +33,7 @@ void OrderBook::remove_order_with_index(const Event event, const unsigned int in
 
 // Remove an order from the order book. Prefer remove_order_with_index if possible.
 // Returns true if an order was removed.
+[[gnu::always_inline]] inline
 bool OrderBook::remove_order(const Event event) noexcept {
     unsigned int index = get_order_index_by_price_and_id(event.price, event.order_id);
     
@@ -77,6 +56,7 @@ void OrderBook::process_submission_event(const Event event) noexcept {
 }
 
 // Get the index of this order with the given price and id, or UINT_MAX if it doesn't exist.
+[[gnu::always_inline]] inline
 unsigned int
 OrderBook::get_order_index_by_price_and_id(const std::uint32_t price, const std::uint32_t order_id) const noexcept {
     auto start = levels_orders[price].data();

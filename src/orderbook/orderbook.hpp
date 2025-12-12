@@ -6,6 +6,7 @@
 namespace nanofill::orderbook {
 
 using events::Event;
+using events::EventType;
 
 constexpr std::size_t order_book_size = 500000;
 
@@ -14,8 +15,30 @@ constexpr std::size_t order_book_size = 500000;
 // different (e.g. maybe stronger emphasis on rationing memory).
 class OrderBook {
 public:
-    bool process_event(const Event event) noexcept;
     OrderBook() noexcept;
+
+    // Returns true if the event was actioned, false if not.
+    [[gnu::always_inline]] inline
+    bool process_event(const Event event) noexcept {
+        // Try and order these from most to least common.
+        switch (event.type) {
+            case EventType::Submission:
+                process_submission_event(event);
+                return true;
+            case EventType::Cancellation:
+                return process_cancellation_event(event);
+            case EventType::ExecutionVisible:
+                return process_visible_execution_event(event);
+            case EventType::Deletion:
+                return process_deletion_event(event);
+            case EventType::ExecutionHidden:
+                // A hidden order was executed. This means we never had it in our order book,
+                // and so there is no real order to process.
+                return false;
+        }
+
+        return false;
+    }
     
 private:
     Event best_bid;
