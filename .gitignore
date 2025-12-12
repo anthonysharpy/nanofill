@@ -1,0 +1,5 @@
+perf.data*
+trader
+.vscode/
+build/
+pgodata/

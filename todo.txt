@@ -1,0 +1,24 @@
+speed benchmarks/tests?
+messages/second benchmark/test?
+
+check intent for issues. e.g. what happens if it tries to buy below 0 price? this will happen probably with current code lol.
+maybe fix that
+
+if my engine buys at the average it might never actually buy anything. since the price is unlikely to suddenly jump
+to the average, and we don't buy near the average. lol
+
+configurable price bands as part of risk check
+japanese translations?
+
+try the pause command in creator thread
+
+
+low latency -> IS NOT HIGH-THROUGHPUT
+
+jitter is unacceptable
+avoid branches
+multithreading is not necessarily good
+use inline attributes - but be sure to measure before/after
+always run the hot path. dump a bad order at the last moment. keeps the cache warm and improves branch prediction
+the producer could filter out crap?
+mark cold paths as unlikely
