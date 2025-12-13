@@ -39,6 +39,7 @@ void render_latency_chart(std::vector<unsigned int> performance_data) {
 
     // Print stats.
     std::cout << std::endl
+        << "===== Per-event latency percentiles =====" << std::endl
         << "P0: " << sorted_data[0] << "ns" << std::endl
         << "P50: " << sorted_data[std::roundl(sorted_data.size() * 0.5)] << "ns" << std::endl
         << "P75: " << sorted_data[std::roundl(sorted_data.size() * 0.75)] << "ns" << std::endl

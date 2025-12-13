@@ -12,13 +12,6 @@ japanese translations?
 
 try the pause command in creator thread
 
-
-low latency -> IS NOT HIGH-THROUGHPUT
-
-jitter is unacceptable
 avoid branches
-multithreading is not necessarily good
-use inline attributes - but be sure to measure before/after
-always run the hot path. dump a bad order at the last moment. keeps the cache warm and improves branch prediction
 the producer could filter out crap?
 mark cold paths as unlikely
