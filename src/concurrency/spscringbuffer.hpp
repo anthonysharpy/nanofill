@@ -8,6 +8,7 @@
 
 namespace nanofill::concurrency {
 
+// The effective size of the buffer is N-1.
 template<typename T, std::size_t N>
 class SPSCRingBuffer {
     // By enforcing this we don't have to do any integer division which is faster.

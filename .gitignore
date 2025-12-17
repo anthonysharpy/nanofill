@@ -3,3 +3,4 @@ trader
 .vscode/
 build/
 pgodata/
+unit_tests
