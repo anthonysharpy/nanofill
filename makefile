@@ -14,7 +14,7 @@
 
 SUPPRESSED_WARNINGS = -Wno-interference-size
 COMPILER = g++-12
-BINARY_NAME = trader
+BINARY_NAME = nanofill
 TESTS_BINARY_NAME = unit_tests
 SRC_DIR = src
 GOOGLE_TEST_INCLUDE_DIR = third_party/googletest/googletest/include
@@ -81,7 +81,7 @@ release:
 pgo-gen: clean
 	rm -rf pgodata
 	$(MAKE) all COMPILE_FLAGS="$(PGO_COMPILE_FLAGS)" LINK_FLAGS="$(PGO_LINK_FLAGS)"
-	./trader
+	./nanofill
 	$(MAKE) clean
 
 # ===== Profile ===== #
