@@ -9,13 +9,9 @@ TradingEngine::TradingEngine(const int price_spread) noexcept {
 }
 
 void TradingEngine::process_order_removed_event(const Event event) noexcept {
-    if (event.size < 0) {
-        total_market_price -= -event.size * event.price;
-        market_shares -= -event.size;
-    } else {
-        total_market_price -= event.size * event.price;
-        market_shares -= event.size;
-    }
+    auto abs_size = std::abs(event.size);
+    total_market_price -= abs_size * event.price;
+    market_shares -= abs_size;
 
     average_share_price = total_market_price / market_shares;
 
@@ -25,13 +21,9 @@ void TradingEngine::process_order_removed_event(const Event event) noexcept {
 }
 
 void TradingEngine::process_order_added_event(const Event event) noexcept {
-    if (event.size < 0) {
-        total_market_price += -event.size * event.price;
-        market_shares += -event.size;
-    } else {
-        total_market_price += event.size * event.price;
-        market_shares += event.size;
-    }
+    auto abs_size = std::abs(event.size);
+    total_market_price += abs_size * event.price;
+    market_shares += abs_size;
 
     average_share_price = total_market_price / market_shares;
 }
