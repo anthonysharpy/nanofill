@@ -101,8 +101,66 @@ TEST(Orderbook, OrderbookProcessCancellationEvent) {
 
 TEST(Orderbook, OrderbookProcesVisibleExecutionEvent) {
     auto orderbook = nanofill::orderbook::OrderBook();
+
+    Event execution_event {
+        .price = 10,
+        .time = 105,
+        .order_id = 1000,
+        .size = 0,
+        .type = EventType::ExecutionVisible
+    };
+
+    // Order doesn't exist, so nothing happens.
+    ASSERT_FALSE(orderbook.process_event(execution_event));
+
+    Event submission_event {
+        .price = 10,
+        .time = 100,
+        .order_id = 1000,
+        .size = 10,
+        .type = EventType::Submission
+    };
+
+    ASSERT_TRUE(orderbook.process_event(submission_event));
+    ASSERT_TRUE(orderbook.process_event(execution_event));
+
+    ASSERT_EQ(orderbook.get_last_modified_for_price(10), 105U);
+    ASSERT_EQ(orderbook.get_total_order_size_for_price(10), 0U);
+
+    auto orders = orderbook.get_orders_for_price(10);
+
+    ASSERT_EQ(orders.size(), 0U);
 }
 
 TEST(Orderbook, OrderbookProcessDeletionEvent) {
     auto orderbook = nanofill::orderbook::OrderBook();
+
+    Event deletion_event {
+        .price = 10,
+        .time = 105,
+        .order_id = 1000,
+        .size = 0,
+        .type = EventType::Deletion
+    };
+
+    // Order doesn't exist, so nothing happens.
+    ASSERT_FALSE(orderbook.process_event(deletion_event));
+
+    Event submission_event {
+        .price = 10,
+        .time = 100,
+        .order_id = 1000,
+        .size = 10,
+        .type = EventType::Submission
+    };
+
+    ASSERT_TRUE(orderbook.process_event(submission_event));
+    ASSERT_TRUE(orderbook.process_event(deletion_event));
+
+    ASSERT_EQ(orderbook.get_last_modified_for_price(10), 105U);
+    ASSERT_EQ(orderbook.get_total_order_size_for_price(10), 0U);
+
+    auto orders = orderbook.get_orders_for_price(10);
+
+    ASSERT_EQ(orders.size(), 0U);
 }

@@ -113,7 +113,7 @@ private:
         }
 
         levels_last_modified[event.price] = event.time;
-        levels_size[event.price] -= event.size;
+        levels_size[event.price] -= levels_orders[event.price][index].size;
         levels_orders[event.price][index] = levels_orders[event.price].back();
         levels_orders[event.price].pop_back();
 

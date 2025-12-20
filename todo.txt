@@ -19,3 +19,5 @@ mark cold paths as unlikely
 stored orderbook events are always submission. so many new type for stored? also, instead of calling it time, call it created time?
 
 we can probably shrink event size to int16? tbh
+
+remove order - instead of popping, set a rubbished flag?
