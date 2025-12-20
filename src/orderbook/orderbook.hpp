@@ -120,6 +120,24 @@ private:
         return true;
     }
 
+    // Get a pointer to the order with the given price and id, or nullptr if it doesn't exist.
+    [[gnu::always_inline]]
+    Event* get_order_by_price_and_id(const std::uint32_t price, const std::uint32_t order_id) noexcept {
+        auto start = levels_orders[price].data();
+        auto position = start;
+        auto end = start + levels_orders[price].size();
+
+        while (position != end) {
+            if (position->order_id == order_id) {
+                return position;
+            }
+
+            ++position;
+        }
+
+        return nullptr;
+    }
+
     // Get the index of this order with the given price and id, or UINT_MAX if it doesn't exist.
     [[gnu::always_inline]]
     unsigned int

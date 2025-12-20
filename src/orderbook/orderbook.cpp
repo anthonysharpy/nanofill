@@ -14,7 +14,7 @@ OrderBook::OrderBook() noexcept {
         levels_orders[i].reserve(50);
     }
 }
-    
+
 // Insert an order into the order book.
 void OrderBook::insert_order(const Event event) noexcept {
     levels_last_modified[event.price] = event.time;
@@ -25,20 +25,15 @@ void OrderBook::insert_order(const Event event) noexcept {
 // An order has had its quantity decreased by the given amount (partial cancellation).
 // Returns true if actioned.
 bool OrderBook::process_cancellation_event(const Event event) noexcept {
-    unsigned int order_index = get_order_index_by_price_and_id(event.price, event.order_id);
+    Event* current_event = get_order_by_price_and_id(event.price, event.order_id);
 
-    if (order_index == UINT_MAX) {
+    if (current_event == nullptr) {
         return false;
     }
 
-    Event old_event = levels_orders[event.price][order_index];
-
-    remove_order_with_index(old_event, order_index);
-
-    old_event.time = event.time;
-    old_event.size -= event.size;
-
-    insert_order(old_event);
+    levels_size[event.price] -= event.size;
+    current_event->size -= event.size;
+    levels_last_modified[event.price] = event.time;
 
     return true;
 }
