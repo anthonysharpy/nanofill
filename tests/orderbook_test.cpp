@@ -3,9 +3,10 @@
 
 using nanofill::events::Event;
 using nanofill::events::EventType;
+using nanofill::orderbook::OrderBook;
 
-TEST(Orderbook, OrderbookProcessSubmissionEvent) {
-    auto orderbook = nanofill::orderbook::OrderBook();
+TEST(Orderbook, ProcessSubmissionEvent) {
+    auto orderbook = OrderBook();
 
     Event event {
         .price = 10,
@@ -61,8 +62,8 @@ TEST(Orderbook, OrderbookProcessSubmissionEvent) {
     ASSERT_EQ(orders[1].type, EventType::Submission);
 }
 
-TEST(Orderbook, OrderbookProcessCancellationEvent) {
-    auto orderbook = nanofill::orderbook::OrderBook();
+TEST(Orderbook, ProcessCancellationEvent) {
+    auto orderbook = OrderBook();
 
     Event cancellation_event {
         .price = 10,
@@ -99,8 +100,8 @@ TEST(Orderbook, OrderbookProcessCancellationEvent) {
     ASSERT_EQ(orders[0].type, EventType::Submission);
 }
 
-TEST(Orderbook, OrderbookProcesVisibleExecutionEvent) {
-    auto orderbook = nanofill::orderbook::OrderBook();
+TEST(Orderbook, ProcessVisibleExecutionEvent) {
+    auto orderbook = OrderBook();
 
     Event execution_event {
         .price = 10,
@@ -132,8 +133,8 @@ TEST(Orderbook, OrderbookProcesVisibleExecutionEvent) {
     ASSERT_EQ(orders.size(), 0U);
 }
 
-TEST(Orderbook, OrderbookProcessDeletionEvent) {
-    auto orderbook = nanofill::orderbook::OrderBook();
+TEST(Orderbook, ProcessDeletionEvent) {
+    auto orderbook = OrderBook();
 
     Event deletion_event {
         .price = 10,
