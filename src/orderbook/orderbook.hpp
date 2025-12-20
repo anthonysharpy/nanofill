@@ -18,7 +18,7 @@ public:
     OrderBook() noexcept;
 
     // Returns true if the event was actioned, false if not.
-    [[gnu::always_inline]] inline
+    [[gnu::always_inline]]
     bool process_event(const Event event) noexcept {
         // Try and order these from most to least common.
         switch (event.type) {
@@ -39,6 +39,21 @@ public:
 
         return false;
     }
+
+    [[gnu::always_inline]]
+    std::uint32_t get_last_modified_for_price(const std::uint32_t price) const noexcept {
+        return levels_last_modified[price];
+    }
+
+    [[gnu::always_inline]]
+    std::uint32_t get_total_order_size_for_price(const std::uint32_t price) const noexcept {
+        return levels_size[price];
+    }
+
+    [[gnu::always_inline]]
+    std::vector<Event> get_orders_for_price(const std::uint32_t price) const noexcept {
+        return levels_orders[price];
+    }
     
 private:
     Event best_bid;
@@ -55,15 +70,74 @@ private:
     std::vector<std::vector<Event>> levels_orders;
 
     void insert_order(const Event event) noexcept;
-    bool remove_order(const Event event) noexcept;
-    void remove_order_with_index(const Event event, const unsigned int index) noexcept;
-    void process_submission_event(const Event event) noexcept;
     bool process_cancellation_event(const Event event) noexcept;
-    bool process_deletion_event(const Event event) noexcept;
-    bool process_visible_execution_event(const Event event) noexcept;
     void process_hidden_execution_event(const Event event) noexcept;
     void process_trading_halted_event(const Event event) noexcept;
-    std::uint32_t get_order_index_by_price_and_id(const std::uint32_t price, const std::uint32_t order_id) const noexcept;
+
+    // An order has been entirely deleted.
+    [[gnu::always_inline]]
+    bool process_deletion_event(const Event event) noexcept {
+        return remove_order(event);
+    }
+
+    // An order we have on our order book has been executed.
+    [[gnu::always_inline]]
+    bool process_visible_execution_event(const Event event) noexcept {
+        return remove_order(event);
+    }
+
+    // We received a new order.
+    [[gnu::always_inline]]
+    void process_submission_event(const Event event) noexcept {
+        insert_order(event);
+    }
+
+    // Same as remove_order, except slightly faster because we already know the order's index.
+    [[gnu::always_inline]]
+    void remove_order_with_index(const Event event, const unsigned int index) noexcept {
+        levels_last_modified[event.price] = event.time;
+        levels_size[event.price] -= event.size;
+        levels_orders[event.price][index] = levels_orders[event.price].back();
+        levels_orders[event.price].pop_back();
+    }
+
+    // Remove an order from the order book. Prefer remove_order_with_index if possible.
+    // Returns true if an order was removed.
+    [[gnu::always_inline]]
+    bool remove_order(const Event event) noexcept {
+        unsigned int index = get_order_index_by_price_and_id(event.price, event.order_id);
+        
+        if (index == UINT_MAX) {
+            // Order not found.
+            return false;
+        }
+
+        levels_last_modified[event.price] = event.time;
+        levels_size[event.price] -= event.size;
+        levels_orders[event.price][index] = levels_orders[event.price].back();
+        levels_orders[event.price].pop_back();
+
+        return true;
+    }
+
+    // Get the index of this order with the given price and id, or UINT_MAX if it doesn't exist.
+    [[gnu::always_inline]]
+    unsigned int
+    get_order_index_by_price_and_id(const std::uint32_t price, const std::uint32_t order_id) const noexcept {
+        auto start = levels_orders[price].data();
+        auto position = start;
+        auto end = start + levels_orders[price].size();
+
+        while (position != end) {
+            if (position->order_id == order_id) {
+                return static_cast<unsigned int>(position - start);
+            }
+
+            ++position;
+        }
+
+        return UINT_MAX;
+    }
 };
 
 }

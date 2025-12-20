@@ -1,11 +1,11 @@
-#include <vector>
 #include "gtest/gtest.h"
 #include "events/event.hpp"
+#include <vector>
 
 using nanofill::events::EventType;
 
 TEST(Events, EventsFromCSVData) {
-    std::vector<std::tuple<double, std::uint8_t, std::uint32_t, std::uint16_t, std::uint32_t, std::int8_t>> csv_data = {
+    std::vector<nanofill::consts::TradingDataCSVFormat> csv_data = {
         { 0, 1, 1001, 10, 25000, 1 },
         { 500, 2, 1002,  5, 24990, -1 },
         { 1000, 3, 1003, 20, 25010, 1 }

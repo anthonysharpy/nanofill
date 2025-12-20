@@ -1,5 +1,6 @@
 #pragma once
 
+#include "consts/consts.hpp"
 #include <cstdint>
 #include <vector>
 #include <new>
@@ -38,7 +39,7 @@ struct Event {
 };
 
 std::vector<Event>
-events_from_csv_data(const std::vector<std::tuple<double, std::uint8_t, std::uint32_t, std::uint16_t, std::uint32_t, std::int8_t>>& csv_data);
+events_from_csv_data(const std::vector<consts::TradingDataCSVFormat>& csv_data);
 
 void print_event(Event event);
 

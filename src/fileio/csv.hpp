@@ -61,10 +61,10 @@ double parse_csv_column<double>(const std::string& column) {
     return output;
 }
 
-template<typename... Types>
-std::tuple<Types...>
+template<typename TypesTuple>
+TypesTuple
 parse_csv_line(const std::string& line) {
-    std::tuple<Types...> output;
+    TypesTuple output;
     std::istringstream string_stream(line);
     std::string column;
 
@@ -83,19 +83,19 @@ parse_csv_line(const std::string& line) {
     return output;
 }
 
-template<typename... Types>
-std::vector<std::tuple<Types...>>
+template<typename TypeTuple>
+std::vector<TypeTuple>
 parse_csv_data(const std::vector<std::string>& file_lines) {
     // In reality we would use a library for this, but for parsing a single CSV
     // I felt like it was simpler to create something myself.
     // This is not supposed to be the most optimised approach by any means.
 
-    std::vector<std::tuple<Types...>> output;
+    std::vector<TypeTuple> output;
 
     output.reserve(file_lines.size());
 
     for (const std::string& line : file_lines) {
-        output.push_back(parse_csv_line<Types...>(line));
+        output.push_back(parse_csv_line<TypeTuple>(line));
     }
 
     return output;

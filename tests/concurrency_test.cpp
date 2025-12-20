@@ -1,6 +1,6 @@
-#include <vector>
 #include "gtest/gtest.h"
 #include "concurrency/spscringbuffer.hpp"
+#include <vector>
 
 using nanofill::concurrency::SPSCRingBuffer;
 

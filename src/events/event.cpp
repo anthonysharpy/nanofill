@@ -1,4 +1,5 @@
 #include "event.hpp"
+#include "consts/consts.hpp"
 #include <tuple>
 #include <cstdint>
 #include <iostream>
@@ -16,7 +17,7 @@ void print_event(Event event) {
 }
 
 std::vector<Event>
-events_from_csv_data(const std::vector<std::tuple<double, std::uint8_t, std::uint32_t, std::uint16_t, std::uint32_t, std::int8_t>>& csv_data) {
+events_from_csv_data(const std::vector<consts::TradingDataCSVFormat>& csv_data) {
     std::vector<Event> events;
     events.resize(csv_data.size());
 

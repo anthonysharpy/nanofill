@@ -6,6 +6,7 @@
 #include "tradingengine/tradingengine.hpp"
 #include "threads/threads.hpp"
 #include "graphics/renderer.hpp"
+#include "consts/consts.hpp"
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -20,8 +21,7 @@ void initialise() {
     std::cin.tie(nullptr);
 }
 
-template<typename... Types>
-std::vector<Event> parse_events(const std::vector<std::tuple<Types...>>& csv_data) {
+std::vector<Event> parse_events(const std::vector<nanofill::consts::TradingDataCSVFormat>& csv_data) {
     std::cout << "Parsing " << csv_data.size() << " events..." << std::endl;
     auto clock_start = std::chrono::steady_clock::now();
     auto events = nanofill::events::events_from_csv_data(csv_data);
@@ -67,7 +67,7 @@ int main() {
     std::vector<std::string> file_data = nanofill::fileio::open_text_file("./data/MSFT_2012-06-21_34200000_57600000_message_10.csv");
 
     std::cout << "Parsing CSV data..." << std::endl;
-    auto csv_data = nanofill::fileio::parse_csv_data<double, std::uint8_t, std::uint32_t, std::uint16_t, std::uint32_t, std::int8_t>(file_data);
+    auto csv_data = nanofill::fileio::parse_csv_data<nanofill::consts::TradingDataCSVFormat>(file_data);
     std::cout << "Done!" << std::endl;
 
     // ===== FROM HERE is where we care about performance ===== //
