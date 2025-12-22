@@ -10,6 +10,17 @@ using events::EventType;
 
 constexpr std::size_t order_book_size = 500000;
 
+// A trading event.
+struct OrderBookEntry {
+    // Dollar price times 10,000.
+    std::uint32_t price;
+    // Seconds after midnight the event happened.
+    std::uint32_t time;
+    std::uint32_t order_id;
+    // Number of shares. Negative means this is a sell order.
+    std::int32_t size;
+};
+
 // Note that this order book only supports one stock index (in our data - Microsoft).
 // For an order book that supports multiple, the choices here would probably be a lot
 // different (e.g. maybe stronger emphasis on rationing memory).
@@ -51,13 +62,11 @@ public:
     }
 
     [[gnu::always_inline]]
-    std::vector<Event> get_orders_for_price(const std::uint32_t price) const noexcept {
+    std::vector<OrderBookEntry> get_orders_for_price(const std::uint32_t price) const noexcept {
         return levels_orders[price];
     }
     
 private:
-    Event best_bid;
-    Event best_ask;
     // Data for all order book levels. We'll store this in arrays instead of structs,
     // as this can give us better cache locality. Each index of each array will represent
     // each possible price.
@@ -67,7 +76,7 @@ private:
      // The number of shares on each level.
     std::vector<std::uint32_t> levels_size;
     // The orders on each level.
-    std::vector<std::vector<Event>> levels_orders;
+    std::vector<std::vector<OrderBookEntry>> levels_orders;
 
     void insert_order(const Event event) noexcept;
     bool process_cancellation_event(const Event event) noexcept;
@@ -122,7 +131,7 @@ private:
 
     // Get a pointer to the order with the given price and id, or nullptr if it doesn't exist.
     [[gnu::always_inline]]
-    Event* get_order_by_price_and_id(const std::uint32_t price, const std::uint32_t order_id) noexcept {
+    OrderBookEntry* get_order_by_price_and_id(const std::uint32_t price, const std::uint32_t order_id) noexcept {
         auto start = levels_orders[price].data();
         auto position = start;
         auto end = start + levels_orders[price].size();

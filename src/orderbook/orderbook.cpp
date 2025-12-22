@@ -19,13 +19,21 @@ OrderBook::OrderBook() noexcept {
 void OrderBook::insert_order(const Event event) noexcept {
     levels_last_modified[event.price] = event.time;
     levels_size[event.price] += std::abs(event.size);
-    levels_orders[event.price].push_back(event);
+
+    OrderBookEntry entry = {
+        .price = event.price,
+        .time = event.time,
+        .order_id = event.order_id,
+        .size = event.size
+    };
+
+    levels_orders[event.price].push_back(entry);
 }
 
 // An order has had its quantity decreased by the given amount (partial cancellation).
 // Returns true if actioned.
 bool OrderBook::process_cancellation_event(const Event event) noexcept {
-    Event* current_event = get_order_by_price_and_id(event.price, event.order_id);
+    OrderBookEntry* current_event = get_order_by_price_and_id(event.price, event.order_id);
 
     if (current_event == nullptr) {
         return false;
