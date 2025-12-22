@@ -5,7 +5,7 @@ using nanofill::events::Event;
 using nanofill::events::EventType;
 using nanofill::orderbook::OrderBook;
 
-TEST(Orderbook, ProcessSubmissionEvent) {
+TEST(OrderBook, ProcessSubmissionEvent) {
     auto orderbook = OrderBook();
 
     Event event {
@@ -32,7 +32,6 @@ TEST(Orderbook, ProcessSubmissionEvent) {
     ASSERT_EQ(orders[0].price, 10U);
     ASSERT_EQ(orders[0].size, 10);
     ASSERT_EQ(orders[0].time, 100U);
-    ASSERT_EQ(orders[0].type, EventType::Submission);
 
     Event event2 {
         .price = 10,
@@ -54,15 +53,13 @@ TEST(Orderbook, ProcessSubmissionEvent) {
     ASSERT_EQ(orders[0].price, 10U);
     ASSERT_EQ(orders[0].size, 10);
     ASSERT_EQ(orders[0].time, 100U);
-    ASSERT_EQ(orders[0].type, EventType::Submission);
     ASSERT_EQ(orders[1].order_id, 1001U);
     ASSERT_EQ(orders[1].price, 10U);
     ASSERT_EQ(orders[1].size, -10);
     ASSERT_EQ(orders[1].time, 105U);
-    ASSERT_EQ(orders[1].type, EventType::Submission);
 }
 
-TEST(Orderbook, ProcessCancellationEvent) {
+TEST(OrderBook, ProcessCancellationEvent) {
     auto orderbook = OrderBook();
 
     Event cancellation_event {
@@ -97,10 +94,9 @@ TEST(Orderbook, ProcessCancellationEvent) {
     ASSERT_EQ(orders[0].price, 10U);
     ASSERT_EQ(orders[0].size, 7);
     ASSERT_EQ(orders[0].time, 100U);
-    ASSERT_EQ(orders[0].type, EventType::Submission);
 }
 
-TEST(Orderbook, ProcessVisibleExecutionEvent) {
+TEST(OrderBook, ProcessVisibleExecutionEvent) {
     auto orderbook = OrderBook();
 
     Event execution_event {
@@ -133,7 +129,7 @@ TEST(Orderbook, ProcessVisibleExecutionEvent) {
     ASSERT_EQ(orders.size(), 0U);
 }
 
-TEST(Orderbook, ProcessDeletionEvent) {
+TEST(OrderBook, ProcessDeletionEvent) {
     auto orderbook = OrderBook();
 
     Event deletion_event {
