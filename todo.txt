@@ -1,5 +1,3 @@
 japanese translations?
 
-mark cold paths as unlikely
-
 clean shouldn't clean tests cus its annoying
