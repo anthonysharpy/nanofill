@@ -11,7 +11,7 @@ OrderBook::OrderBook() noexcept {
     levels_size.resize(order_book_size);
 
     for (size_t i = 0; i < order_book_size; ++i) {
-        levels_orders[i].reserve(50);
+        levels_orders[i].reserve(100);
     }
 }
 
