@@ -43,17 +43,14 @@ void event_consumer(
     unsigned int events_found = 0;
     std::chrono::steady_clock::time_point clock_start;
     std::chrono::steady_clock::time_point clock_end;
+    unsigned int i = 0;
 
     // Consume all the events. We'll stop when we've processed them all. In the real world,
     // this would keep going.
     while (events_consumed != 668765) {
         events_found = event_buffer.pop_many(events, 8);
 
-        if (events_found == 0) {
-            continue;
-        }
-
-        for (unsigned int i = 0; i < events_found; ++i) {
+        for (i = 0; i < events_found; ++i) {
             // Logging on this hot path is probably not a good idea for performance.
             clock_start = std::chrono::steady_clock::now();
 
