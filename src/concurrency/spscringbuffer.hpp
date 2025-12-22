@@ -9,9 +9,11 @@
 namespace nanofill::concurrency {
 
 // The effective size of the buffer is N-1.
+// バッファのサイズがＮ−１だ。
 template<typename T, std::size_t N>
 class SPSCRingBuffer {
     // By enforcing this we don't have to do any integer division which is faster.
+    // そうすると、整数除算が必要がなくなり、早くなる。
     static_assert(N > 0 && (N & (N - 1)) == 0, "N must be a power of 2");
 
     alignas(std::hardware_destructive_interference_size) std::atomic<size_t> head{0};
@@ -20,6 +22,7 @@ class SPSCRingBuffer {
 
 public:
     // Returns true if successful.
+    // 成功なら、trueを返す。
     bool pop(T& item) noexcept {
         const std::size_t current_tail = tail.load(std::memory_order_relaxed);
         const std::size_t current_head = head.load(std::memory_order_acquire);
@@ -36,6 +39,7 @@ public:
 
     // Returns the number of items popped. maximum must be less than the size of
     // the buffer or the behaviour is undefined.
+    // 取り出したものの数を返す。maximumは、バッファのサイズ以内じゃなければ、未定義動作だ。
     unsigned int pop_many(T* items, const unsigned int maximum) noexcept {
         const std::size_t current_tail = tail.load(std::memory_order_relaxed);
         const std::size_t current_head = head.load(std::memory_order_acquire);
@@ -55,13 +59,16 @@ public:
         }
 
         // Before we wrap this back to the start of the queue.
+        // 先頭に戻る前の生の値。
         const std::size_t next_tail_raw = current_tail + number_to_pop;
 
         if (next_tail_raw < N) {
             // No wrap-around, we can just write everything in one go.
+            //　先頭に戻らず、一発で書き込める。
             std::memcpy(items, &buffer[current_tail], number_to_pop * sizeof(T));
         } else {
             // We have to do two copies.
+            // 二回コピーしなければならない。
             const std::size_t first_copy_size = N - current_tail;
             const std::size_t second_copy_size = number_to_pop - first_copy_size;
 
@@ -75,6 +82,7 @@ public:
     }
 
     // Returns true if successful.
+    // 成功なら、trueを返す。
     bool push(const T item) noexcept {
         const std::size_t current_tail = tail.load(std::memory_order_acquire);
         const std::size_t current_head = head.load(std::memory_order_relaxed);
