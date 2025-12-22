@@ -10,14 +10,6 @@ to the average, and we don't buy near the average. lol
 configurable price bands as part of risk check
 japanese translations?
 
-try the pause command in creator thread
-
-avoid branches
-the producer could filter out crap?
 mark cold paths as unlikely
-
-we can probably shrink event size to int16? tbh
-
-remove order - instead of popping, set a rubbished flag?
 
 clean shouldn't clean tests cus its annoying

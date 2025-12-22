@@ -34,7 +34,7 @@ struct Event {
     std::uint32_t time;
     std::uint32_t order_id;
     // Number of shares. Negative means this is a sell order.
-    std::int32_t size;
+    std::int16_t size;
     EventType type;
 };
 
