@@ -114,16 +114,16 @@ private:
     // Returns true if an order was removed.
     [[gnu::always_inline]]
     bool remove_order(const Event event) noexcept {
-        unsigned int index = get_order_index_by_price_and_id(event.price, event.order_id);
+        auto entry = get_order_by_price_and_id(event.price, event.order_id);
         
-        if (index == UINT_MAX) {
+        if (entry == nullptr) {
             // Order not found.
             return false;
         }
 
         levels_last_modified[event.price] = event.time;
-        levels_size[event.price] -= levels_orders[event.price][index].size;
-        levels_orders[event.price][index] = levels_orders[event.price].back();
+        levels_size[event.price] -= entry->size;
+        *entry = levels_orders[event.price].back();
         levels_orders[event.price].pop_back();
 
         return true;
@@ -145,25 +145,6 @@ private:
         }
 
         return nullptr;
-    }
-
-    // Get the index of this order with the given price and id, or UINT_MAX if it doesn't exist.
-    [[gnu::always_inline]]
-    unsigned int
-    get_order_index_by_price_and_id(const std::uint32_t price, const std::uint32_t order_id) const noexcept {
-        auto start = levels_orders[price].data();
-        auto position = start;
-        auto end = start + levels_orders[price].size();
-
-        while (position != end) {
-            if (position->order_id == order_id) {
-                return static_cast<unsigned int>(position - start);
-            }
-
-            ++position;
-        }
-
-        return UINT_MAX;
     }
 };
 
