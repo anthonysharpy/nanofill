@@ -132,7 +132,7 @@ private:
     // Get a pointer to the order with the given price and id, or nullptr if it doesn't exist.
     [[gnu::always_inline]]
     OrderBookEntry* get_order_by_price_and_id(const std::uint32_t price, const std::uint32_t order_id) noexcept {
-        auto start = levels_orders[price].data();
+        auto start = &levels_orders[price][0];
         auto position = start;
         auto end = start + levels_orders[price].size();
 
