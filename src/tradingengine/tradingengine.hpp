@@ -29,19 +29,14 @@ public:
 
     [[gnu::always_inline]] inline
     void process_event(const Event event) noexcept {
-        switch (event.type) {
-            case EventType::Submission:
-                process_order_added_event(event);
-                break;
-            case EventType::Cancellation:
-            case EventType::Deletion:
-            case EventType::ExecutionVisible:
-                process_order_removed_event(event);
-                break;
-            case EventType::ExecutionHidden:
-                // Processing would lead to strange results since this order was never recorded.
-                return;
-        }    
+        if (event.type == EventType::Submission) {
+            process_order_added_event(event);
+        } else if (event.type != EventType::ExecutionHidden) {
+            process_order_removed_event(event);
+        } else {
+            // Processing would lead to strange results since this order was never recorded.
+            return;
+        }
 
         update_position();
     }
