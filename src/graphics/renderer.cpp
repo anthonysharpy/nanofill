@@ -9,10 +9,12 @@ namespace nanofill::graphics {
 
 // Using the latency performance data we collected, draw a nice chart in the console that
 // shows the latency distribution.
+// さっき収集したレイテンシ性能のデータで、レイテンシ分布を示すために、コンソールでいい表を作ろう。
 void render_latency_chart(std::vector<unsigned int> performance_data) {
     auto p999_n = performance_data.size() * 0.999;
 
-    // Created sorted version of data so we can measure percentiles etc.
+    // Create sorted version of data so we can measure percentiles etc.
+    // パーセンタイルを測るために、ソートしたバージョンを作る。
     auto sorted_data = performance_data;
     std::sort(sorted_data.begin(), sorted_data.end());
 
@@ -24,11 +26,13 @@ void render_latency_chart(std::vector<unsigned int> performance_data) {
     std::array<int, chart_columns> frequency_table{};
 
     // Calculate the frequency table.
+    // 度数表を計算する。
     for (auto latency : p999_data) {
         ++frequency_table[std::lround((float)(latency - smallest_latency) / band_size)];
     }
     
     // Figure out what the highest frequency was.
+    // 一番度数が高い度数をチェックする。
     int highest_frequency = 0;
 
     for (auto frequency : frequency_table) {
@@ -38,6 +42,7 @@ void render_latency_chart(std::vector<unsigned int> performance_data) {
     }
 
     // Print stats.
+    // 統計情報を出力する。
     std::cout << std::endl
         << "===== Per-event latency percentiles =====" << std::endl
         << "P0: " << sorted_data[0] << "ns" << std::endl
@@ -51,6 +56,7 @@ void render_latency_chart(std::vector<unsigned int> performance_data) {
         << std::endl;
 
     // Print the frequency table.
+    // 度数表を出力する。
     std::cout << "===== P99.9 latency distribution =====" << std::endl;
 
     for (std::size_t i = 0; i < frequency_table.size(); ++i) {
@@ -59,6 +65,8 @@ void render_latency_chart(std::vector<unsigned int> performance_data) {
 
         // I think this technically causes a bug where the last column is incorrectly overrepresented,
         // but the graph's tail is so small that it doesn't really matter in our data.
+        // 厳密には、これで、最後の列が過剰に表現されていてしまい、バグになっていて、表の尾がとても小さいから、
+        // このため、実は問題ない。
         int bar_width = std::roundl(((float)frequency_table[i] / highest_frequency) * chart_height);
         std::string bar(bar_width, '|');
         bar.insert(bar.size(), chart_height - bar.size(), ' ');

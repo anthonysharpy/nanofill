@@ -18,6 +18,8 @@ std::uint32_t parse_csv_column<std::uint32_t>(const std::string& column) {
 
     // Since we know the data is well-formed, we won't check for errors.
     // Obviously, this is probably a bad idea in the real world.
+    // 今回のデータは絶対に形式が正しいので、エラーをチェックしない。もちろん、これは
+    // 普通に望ましくないアイデアだ。
     return output;
 }
 
@@ -28,6 +30,8 @@ std::uint16_t parse_csv_column<std::uint16_t>(const std::string& column) {
 
     // Since we know the data is well-formed, we won't check for errors.
     // Obviously, this is probably a bad idea in the real world.
+    // 今回のデータは絶対に形式が正しいので、エラーをチェックしない。もちろん、これは
+    // 普通に望ましくないアイデアだ。
     return output;
 }
 
@@ -38,6 +42,8 @@ std::uint8_t parse_csv_column<std::uint8_t>(const std::string& column) {
 
     // Since we know the data is well-formed, we won't check for errors.
     // Obviously, this is probably a bad idea in the real world.
+    // 今回のデータは絶対に形式が正しいので、エラーをチェックしない。もちろん、これは
+    // 普通に望ましくないアイデアだ。
     return output;
 }
 
@@ -48,6 +54,8 @@ std::int8_t parse_csv_column<std::int8_t>(const std::string& column) {
 
     // Since we know the data is well-formed, we won't check for errors.
     // Obviously, this is probably a bad idea in the real world.
+    // 今回のデータは絶対に形式が正しいので、エラーをチェックしない。もちろん、これは
+    // 普通に望ましくないアイデアだ。
     return output;
 }
 
@@ -58,6 +66,8 @@ double parse_csv_column<double>(const std::string& column) {
 
     // Since we know the data is well-formed, we won't check for errors.
     // Obviously, this is probably a bad idea in the real world.
+    // 今回のデータは絶対に形式が正しいので、エラーをチェックしない。もちろん、これは
+    // 普通に望ましくないアイデアだ。
     return output;
 }
 
@@ -89,6 +99,9 @@ parse_csv_data(const std::vector<std::string>& file_lines) {
     // In reality we would use a library for this, but for parsing a single CSV
     // I felt like it was simpler to create something myself.
     // This is not supposed to be the most optimised approach by any means.
+    // 実はライブラリを使うのほうがいいけど、この一つのCSVを解析するために、簡単な自家製の
+    // ソリューションのうほうが楽しそうだった。
+    // これはどうしても最適解ではない。
 
     std::vector<TypeTuple> output;
 
