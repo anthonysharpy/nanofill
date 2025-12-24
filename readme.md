@@ -1,6 +1,6 @@
 # NanoFill
 
-NanoFill is a low-latency market data orderbook and trading engine that records and analyses real market data.
+NanoFill is a C++ low-latency market data orderbook and trading engine that records and analyses real market data.
 
 The system is designed around a number of low-latency techniques:
 
