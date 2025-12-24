@@ -1,3 +1,0 @@
-japanese translations?
-
-clean shouldn't clean tests cus its annoying
