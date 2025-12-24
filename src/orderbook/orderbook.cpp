@@ -5,7 +5,7 @@ namespace nanofill::orderbook {
 
 using events::Event;
 
-OrderBook::OrderBook() noexcept {
+OrderBook::OrderBook() {
     levels_orders.resize(order_book_size);
     levels_last_modified.resize(order_book_size);
     levels_size.resize(order_book_size);
@@ -17,7 +17,7 @@ OrderBook::OrderBook() noexcept {
 
 // Insert an order into the order book.
 // 板に注文を入れる。
-void OrderBook::insert_order(const Event event) noexcept {
+void OrderBook::insert_order(const Event event) {
     levels_last_modified[event.price] = event.time;
     levels_size[event.price] += std::abs(event.size);
 
@@ -35,7 +35,7 @@ void OrderBook::insert_order(const Event event) noexcept {
 // Returns true if processed.
 // 注文のサイズが減って。
 // 処理したら、trueを返す。
-bool OrderBook::process_cancellation_event(const Event event) noexcept {
+bool OrderBook::process_cancellation_event(const Event event) {
     OrderBookEntry* current_event = get_order_by_price_and_id(event.price, event.order_id);
 
     if (current_event == nullptr) {

@@ -33,12 +33,12 @@ struct OrderBookEntry {
 // の割り当ての制限を重視する）。
 class OrderBook {
 public:
-    OrderBook() noexcept;
+    OrderBook();
 
     // Returns true if the event was actioned, false if not.
     // 処理したら、trueを返す。または、false。
     [[gnu::always_inline]]
-    bool process_event(const Event event) noexcept {
+    bool process_event(const Event event) {
         // Ordered from most to least common.
         // 多い順に並べっている。
         switch (event.type) {
@@ -60,17 +60,17 @@ public:
     }
 
     [[gnu::always_inline]]
-    std::uint32_t get_last_modified_for_price(const std::uint32_t price) const noexcept {
+    std::uint32_t get_last_modified_for_price(const std::uint32_t price) const {
         return levels_last_modified[price];
     }
 
     [[gnu::always_inline]]
-    std::uint32_t get_total_order_size_for_price(const std::uint32_t price) const noexcept {
+    std::uint32_t get_total_order_size_for_price(const std::uint32_t price) const {
         return levels_size[price];
     }
 
     [[gnu::always_inline]]
-    const std::vector<OrderBookEntry>& get_orders_for_price(const std::uint32_t price) const noexcept {
+    const std::vector<OrderBookEntry>& get_orders_for_price(const std::uint32_t price) const {
         return levels_orders[price];
     }
     
@@ -91,36 +91,36 @@ private:
     // 各レベルの注文。
     std::vector<std::vector<OrderBookEntry>> levels_orders;
 
-    void insert_order(const Event event) noexcept;
-    bool process_cancellation_event(const Event event) noexcept;
-    void process_hidden_execution_event(const Event event) noexcept;
-    void process_trading_halted_event(const Event event) noexcept;
+    void insert_order(const Event event);
+    bool process_cancellation_event(const Event event);
+    void process_hidden_execution_event(const Event event);
+    void process_trading_halted_event(const Event event);
 
     // An order has been entirely deleted.
     // 注文が完全に削除された。
     [[gnu::always_inline]]
-    bool process_deletion_event(const Event event) noexcept {
+    bool process_deletion_event(const Event event) {
         return remove_order(event);
     }
 
     // An order we have on our order book has been executed.
     // 板にある注文が実行された。
     [[gnu::always_inline]]
-    bool process_visible_execution_event(const Event event) noexcept {
+    bool process_visible_execution_event(const Event event) {
         return remove_order(event);
     }
 
     // We received a new order.
     // 新しい注文を受け取った。
     [[gnu::always_inline]]
-    void process_submission_event(const Event event) noexcept {
+    void process_submission_event(const Event event) {
         insert_order(event);
     }
 
     // Same as remove_order, except slightly faster because we already know the order's index.
     // remove_orderと同じだが、注文のインデックスがもう分かるので、もう少し速い。
     [[gnu::always_inline]]
-    void remove_order_with_index(const Event event, const unsigned int index) noexcept {
+    void remove_order_with_index(const Event event, const unsigned int index) {
         levels_last_modified[event.price] = event.time;
         levels_size[event.price] -= event.size;
         levels_orders[event.price][index] = levels_orders[event.price].back();
@@ -132,7 +132,7 @@ private:
     // 板から注文を削除する。できれば、remove_order_with_indexを使って。注文を削除できたら、trueを
     // 返す。
     [[gnu::always_inline]]
-    bool remove_order(const Event event) noexcept {
+    bool remove_order(const Event event) {
         auto entry = get_order_by_price_and_id(event.price, event.order_id);
         
         if (entry == nullptr) {
@@ -151,7 +151,7 @@ private:
     // Get a pointer to the order with the given price and id, or nullptr if it doesn't exist.
     // この価格とIDがある注文のポインタを返す。ないと、nullptrを返す。
     [[gnu::always_inline]]
-    OrderBookEntry* get_order_by_price_and_id(const std::uint32_t price, const std::uint32_t order_id) noexcept {
+    OrderBookEntry* get_order_by_price_and_id(const std::uint32_t price, const std::uint32_t order_id) {
         auto start = &levels_orders[price][0];
         auto position = start;
         auto end = start + levels_orders[price].size();
