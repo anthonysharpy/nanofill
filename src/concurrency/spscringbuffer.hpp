@@ -23,7 +23,7 @@ class SPSCRingBuffer {
 public:
     // Returns true if successful.
     // 成功なら、trueを返す。
-    bool pop(T& item) {
+    bool pop(T& item) noexcept {
         const std::size_t current_tail = tail.load(std::memory_order_relaxed);
         const std::size_t current_head = head.load(std::memory_order_acquire);
 
@@ -40,7 +40,7 @@ public:
     // Returns the number of items popped. maximum must be less than the size of
     // the buffer or the behaviour is undefined.
     // 取り出したものの数を返す。maximumは、バッファのサイズ以内じゃなければ、未定義動作だ。
-    unsigned int pop_many(T* items, const unsigned int maximum) {
+    unsigned int pop_many(T* items, const unsigned int maximum) noexcept {
         const std::size_t current_tail = tail.load(std::memory_order_relaxed);
         const std::size_t current_head = head.load(std::memory_order_acquire);
         std::size_t number_to_pop;
@@ -83,7 +83,7 @@ public:
 
     // Returns true if successful.
     // 成功なら、trueを返す。
-    bool push(const T item) {
+    bool push(const T item) noexcept {
         const std::size_t current_tail = tail.load(std::memory_order_acquire);
         const std::size_t current_head = head.load(std::memory_order_relaxed);
         const std::size_t next_head = (current_head + 1) & (N - 1);

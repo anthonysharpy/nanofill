@@ -17,7 +17,7 @@ using events::Event;
 // Pushes events into the event buffer.
 // イベントバッファにイベントを入れる。
 template<size_t N>
-void event_producer(SPSCRingBuffer<Event, N>& event_buffer, const std::vector<Event>& events) {
+void event_producer(SPSCRingBuffer<Event, N>& event_buffer, const std::vector<Event>& events) noexcept {
     // I don't know why but the profiler said that using pointers was faster than the [] operator.
     // 理由が分からないけど、プロファイラによって、[]を使うのより、ポインタを使うほうが速い。
 
@@ -43,7 +43,7 @@ void event_consumer(
     OrderBook& order_book,
     TradingEngine& trading_engine,
     std::vector<unsigned int>& performance_data
-) {
+) noexcept {
     std::size_t events_consumed = 0;
     Event events[8];
     unsigned int events_found = 0;

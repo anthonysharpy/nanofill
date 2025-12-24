@@ -34,10 +34,10 @@ public:
     // 取引処理エンジンが売ってもらいたい価格。
     std::uint32_t target_sell_price = 0;
     
-    TradingEngine(const int price_spread);
+    TradingEngine(const int price_spread) noexcept;
 
     [[gnu::always_inline]] inline
-    void process_event(const Event event) {
+    void process_event(const Event event) noexcept {
         if (event.type == EventType::Submission) {
             process_order_added_event(event);
         } else if (event.type != EventType::ExecutionHidden) {
@@ -56,11 +56,11 @@ private:
     // 売ってもらいたい・買ってもらいたい平均株価からの距離。
     std::uint32_t price_spread = 0;
 
-    void update_position();
-    void generate_intent(const std::int32_t amount, const std::uint32_t price);
-    void cancel_all_orders();
-    void process_order_removed_event(const Event event);
-    void process_order_added_event(const Event event);
+    void update_position() noexcept;
+    void generate_intent(const std::int32_t amount, const std::uint32_t price) noexcept;
+    void cancel_all_orders() noexcept;
+    void process_order_removed_event(const Event event) noexcept;
+    void process_order_added_event(const Event event) noexcept;
 };
 
 }
