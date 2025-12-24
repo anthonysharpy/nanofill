@@ -17,7 +17,11 @@ void TradingEngine::process_order_removed_event(const Event event) noexcept {
     total_market_price -= abs_size * event.price;
     market_shares -= abs_size;
 
-    average_share_price = total_market_price / market_shares;
+    if (market_shares > 0) {
+        average_share_price = total_market_price / market_shares;
+    } else {
+        average_share_price = 0;
+    }
 
     if (event.type == EventType::ExecutionHidden || event.type == EventType::ExecutionVisible) {
         last_execution_order = event;
@@ -29,7 +33,11 @@ void TradingEngine::process_order_added_event(const Event event) noexcept {
     total_market_price += abs_size * event.price;
     market_shares += abs_size;
 
-    average_share_price = total_market_price / market_shares;
+    if (market_shares > 0) {
+        average_share_price = total_market_price / market_shares;
+    } else {
+        average_share_price = 0;
+    }
 }
 
 // The market value has changed. Update our position.

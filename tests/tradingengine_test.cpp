@@ -137,3 +137,33 @@ TEST(TradingEngine, ProcessAllEvents) {
     ASSERT_EQ(trading_engine.last_execution_order.time, 120U);
     ASSERT_EQ(trading_engine.last_execution_order.type, EventType::ExecutionVisible);
 }
+
+TEST(TradingEngine, DoesntCrashWhenSharesReachZero) {
+    auto trading_engine = TradingEngine(20);
+
+    // Submission (buy).
+    Event buy_submission_event {
+        .price = 10,
+        .time = 100,
+        .order_id = 1000,
+        .size = 10,
+        .type = EventType::Submission
+    };
+
+    trading_engine.process_event(buy_submission_event);
+
+    ASSERT_EQ(10U, trading_engine.market_shares);
+
+    // Deletion.
+    Event deletion_event {
+        .price = 20,
+        .time = 115,
+        .order_id = 1000,
+        .size = 10,
+        .type = EventType::Deletion
+    };
+
+    trading_engine.process_event(deletion_event);
+
+    ASSERT_EQ(0U, trading_engine.market_shares);
+}

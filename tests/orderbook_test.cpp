@@ -96,6 +96,68 @@ TEST(OrderBook, ProcessCancellationEvent) {
     ASSERT_EQ(orders[0].time, 100U);
 }
 
+TEST(OrderBook, ProcessCancellationEventChangesEventSizeCorrectly) {
+    auto orderbook = OrderBook();
+
+    Event submission_event {
+        .price = 10,
+        .time = 100,
+        .order_id = 1000,
+        .size = 10,
+        .type = EventType::Submission
+    };
+
+    ASSERT_TRUE(orderbook.process_event(submission_event));
+
+    auto entries = orderbook.get_orders_for_price(10);
+
+    ASSERT_EQ(entries[0].size, 10);
+
+        Event cancellation_event {
+        .price = 10,
+        .time = 105,
+        .order_id = 1000,
+        .size = 3,
+        .type = EventType::Cancellation
+    };
+
+    ASSERT_TRUE(orderbook.process_event(cancellation_event));
+
+    entries = orderbook.get_orders_for_price(10);
+
+    ASSERT_EQ(entries[0].size, 7);
+
+    // This event has a negative size, make sure it's handled correctly.
+
+    Event submission_event2 {
+        .price = 10,
+        .time = 100,
+        .order_id = 1001,
+        .size = -10,
+        .type = EventType::Submission
+    };
+
+    ASSERT_TRUE(orderbook.process_event(submission_event2));
+
+    entries = orderbook.get_orders_for_price(10);
+
+    ASSERT_EQ(entries[1].size, -10);
+
+        Event cancellation_event2 {
+        .price = 10,
+        .time = 105,
+        .order_id = 1001,
+        .size = 3,
+        .type = EventType::Cancellation
+    };
+
+    ASSERT_TRUE(orderbook.process_event(cancellation_event2));
+
+    entries = orderbook.get_orders_for_price(10);
+
+    ASSERT_EQ(entries[1].size, -7);
+}
+
 TEST(OrderBook, ProcessVisibleExecutionEvent) {
     auto orderbook = OrderBook();
 

@@ -42,8 +42,8 @@ bool OrderBook::process_cancellation_event(const Event event) noexcept {
         return false;
     }
 
-    levels_size[event.price] -= event.size;
-    current_event->size -= event.size;
+    levels_size[event.price] -= std::abs(event.size);
+    current_event->size -= event.size * (1 - 2 * (current_event->size < 0));
     levels_last_modified[event.price] = event.time;
 
     return true;

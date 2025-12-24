@@ -2,6 +2,7 @@
 
 #include "events/event.hpp"
 #include <climits>
+#include <cstdlib>
 
 namespace nanofill::orderbook {
 
@@ -122,7 +123,7 @@ private:
     [[gnu::always_inline]]
     void remove_order_with_index(const Event event, const unsigned int index) noexcept {
         levels_last_modified[event.price] = event.time;
-        levels_size[event.price] -= event.size;
+        levels_size[event.price] -= std::abs(event.size);
         levels_orders[event.price][index] = levels_orders[event.price].back();
         levels_orders[event.price].pop_back();
     }
@@ -141,7 +142,7 @@ private:
         }
 
         levels_last_modified[event.price] = event.time;
-        levels_size[event.price] -= entry->size;
+        levels_size[event.price] -= std::abs(entry->size);
         *entry = levels_orders[event.price].back();
         levels_orders[event.price].pop_back();
 
