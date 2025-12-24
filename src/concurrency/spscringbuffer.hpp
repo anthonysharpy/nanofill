@@ -41,6 +41,8 @@ public:
     // the buffer or the behaviour is undefined.
     // 取り出したものの数を返す。maximumは、バッファのサイズ以内じゃなければ、未定義動作だ。
     unsigned int pop_many(T* items, const unsigned int maximum) noexcept {
+        static_assert(std::is_trivially_copyable_v<T>, "pop_many requires trivially copyable T");
+
         const std::size_t current_tail = tail.load(std::memory_order_relaxed);
         const std::size_t current_head = head.load(std::memory_order_acquire);
         std::size_t number_to_pop;
