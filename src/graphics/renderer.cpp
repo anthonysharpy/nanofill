@@ -22,8 +22,8 @@ void render_latency_chart(std::vector<unsigned int> performance_data) {
     unsigned int smallest_latency = p999_data[0];
     unsigned int highest_latency = p999_data[p999_data.size() - 1];
     int range = highest_latency - smallest_latency;
-    int band_size = range / chart_columns;
-    std::array<int, chart_columns> frequency_table{};
+    int band_size = range / chart_rows;
+    std::array<int, chart_rows> frequency_table{};
 
     // Calculate the frequency table.
     // 度数表を計算する。
@@ -67,9 +67,9 @@ void render_latency_chart(std::vector<unsigned int> performance_data) {
         // but the graph's tail is so small that it doesn't really matter in our data.
         // 厳密には、これで、最後の列が過剰に表現されていてしまい、バグになっていて、表の尾がとても小さいから、
         // このため、実は問題ない。
-        int bar_width = std::roundl(((float)frequency_table[i] / highest_frequency) * chart_height);
+        int bar_width = std::roundl(((float)frequency_table[i] / highest_frequency) * chart_width);
         std::string bar(bar_width, '|');
-        bar.insert(bar.size(), chart_height - bar.size(), ' ');
+        bar.insert(bar.size(), chart_width - bar.size(), ' ');
 
         std::string n = "(" + std::to_string(frequency_table[i]) + ")";
 

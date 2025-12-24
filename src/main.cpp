@@ -71,11 +71,13 @@ int main() {
     std::cout << "Done!" << std::endl;
 
     // ===== FROM HERE is where we care about performance ===== //
+    // ===== ここから性能が大事だ ===== //
 
     auto events = parse_events(csv_data);
     auto performance_data = process_events(events, trading_engine, order_book);    
 
     // ===== Don't care about performance after this ===== //
+    // ===== ここから性能がどうでもいい ===== //
 
     nanofill::graphics::render_latency_chart(performance_data);
 

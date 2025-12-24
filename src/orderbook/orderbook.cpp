@@ -16,6 +16,7 @@ OrderBook::OrderBook() noexcept {
 }
 
 // Insert an order into the order book.
+// 板に注文を入れる。
 void OrderBook::insert_order(const Event event) noexcept {
     levels_last_modified[event.price] = event.time;
     levels_size[event.price] += std::abs(event.size);
@@ -31,7 +32,9 @@ void OrderBook::insert_order(const Event event) noexcept {
 }
 
 // An order has had its quantity decreased by the given amount (partial cancellation).
-// Returns true if actioned.
+// Returns true if processed.
+// 注文のサイズが減って。
+// 処理したら、trueを返す。
 bool OrderBook::process_cancellation_event(const Event event) noexcept {
     OrderBookEntry* current_event = get_order_by_price_and_id(event.price, event.order_id);
 
