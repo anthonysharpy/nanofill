@@ -20,7 +20,8 @@ template<size_t N>
 void event_producer(SPSCRingBuffer<Event, N>& event_buffer, const std::vector<Event>& events) noexcept {
     // I don't know why but the profiler said that using pointers was faster than the [] operator.
     // 理由が分からないけど、プロファイラによって、[]を使うのより、ポインタを使うほうが速い。
-    auto position = events.data();
+
+    auto position = &events[0];
     auto end = position + events.size();
 
     // It is much more efficient to push multiple events at once, however I've not done that as

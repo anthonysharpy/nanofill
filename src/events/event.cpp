@@ -8,7 +8,7 @@ namespace nanofill::events {
 
 // Print an event to the console for debugging.
 // デバッギングのために、コンソールにイベントを出力する。
-void print_event(Event event) {
+void print_event(const Event event) {
     std::cout << "orderid=" << event.order_id
         << "time=" << event.time
         << "price=" << event.price
