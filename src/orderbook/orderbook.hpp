@@ -2,7 +2,6 @@
 
 #include "events/event.hpp"
 #include <climits>
-#include <cstdlib>
 
 namespace nanofill::orderbook {
 
@@ -92,11 +91,6 @@ private:
     // 各レベルの注文。
     std::vector<std::vector<OrderBookEntry>> levels_orders;
 
-    void insert_order(const Event event) noexcept;
-    bool process_cancellation_event(const Event event) noexcept;
-    void process_hidden_execution_event(const Event event) noexcept;
-    void process_trading_halted_event(const Event event) noexcept;
-
     // An order has been entirely deleted.
     // 注文が完全に削除された。
     [[gnu::always_inline]]
@@ -166,6 +160,42 @@ private:
         }
 
         return nullptr;
+    }
+
+    // An order has had its quantity decreased by the given amount (partial cancellation).
+    // Returns true if processed.
+    // 注文のサイズが減って。
+    // 処理したら、trueを返す。
+    [[gnu::always_inline]]
+    bool process_cancellation_event(const Event event) noexcept {
+        OrderBookEntry* current_event = get_order_by_price_and_id(event.price, event.order_id);
+
+        if (current_event == nullptr) {
+            return false;
+        }
+
+        levels_size[event.price] -= std::abs(event.size);
+        current_event->size -= event.size * (1 - 2 * (current_event->size < 0));
+        levels_last_modified[event.price] = event.time;
+
+        return true;
+    }
+
+    // Insert an order into the order book.
+    // 板に注文を入れる。
+    [[gnu::always_inline]]
+    void insert_order(const Event event) noexcept {
+        levels_last_modified[event.price] = event.time;
+        levels_size[event.price] += std::abs(event.size);
+
+        OrderBookEntry entry = {
+            .price = event.price,
+            .time = event.time,
+            .order_id = event.order_id,
+            .size = event.size
+        };
+
+        levels_orders[event.price].push_back(entry);
     }
 };
 
