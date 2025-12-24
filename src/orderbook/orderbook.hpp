@@ -70,7 +70,7 @@ public:
     }
 
     [[gnu::always_inline]]
-    std::vector<OrderBookEntry> get_orders_for_price(const std::uint32_t price) const noexcept {
+    const std::vector<OrderBookEntry>& get_orders_for_price(const std::uint32_t price) const noexcept {
         return levels_orders[price];
     }
     
@@ -83,7 +83,7 @@ private:
 
     // The time of the last event on each level (according to the event).
     // 各レベルの最後のイベントの時（イベントによって）。
-    std::vector<double> levels_last_modified;
+    std::vector<std::uint32_t> levels_last_modified;
     // The number of shares on each level.
     // 各レベルの株の数。
     std::vector<std::uint32_t> levels_size;
