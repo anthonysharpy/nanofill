@@ -17,6 +17,12 @@ The software comes complete with the ability to produce its own latency distribu
 
 ![Software output](/media/output.png)
 
+# Usage
+
+- **Release build**: `make pgo-gen` -> `make release`
+- **Profile build**: `make pgo-gen` -> `make profile` (may require some extra software)
+- **Run tests**: `make test`
+- **Normal build (not recommended)**: `make`
 
 # Sources
 
