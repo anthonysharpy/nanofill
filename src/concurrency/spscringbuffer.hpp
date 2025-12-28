@@ -13,7 +13,7 @@ namespace nanofill::concurrency {
 template<typename T, std::size_t N>
 class SPSCRingBuffer {
     // By enforcing this we don't have to do any integer division which is faster.
-    // そうすると、整数除算が必要がなくなり、早くなる。
+    // そうすると、整数除算が必要がなくなり、速くなる。
     static_assert(N > 0 && (N & (N - 1)) == 0, "N must be a power of 2");
 
     alignas(std::hardware_destructive_interference_size) std::atomic<size_t> head{0};

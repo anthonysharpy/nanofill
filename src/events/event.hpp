@@ -38,14 +38,14 @@ enum class EventType : std::uint8_t {
 // 取引のイベント。
 struct Event {
     // Dollar price times 10,000.
-    // 10,000倍したドラの価格。
+    // 10,000倍したドルの価格。
     std::uint32_t price;
     // Seconds after midnight the event happened.
     // イベントが発生したときからの零時から数秒。
     std::uint32_t time;
     std::uint32_t order_id;
     // Number of shares. Negative means this is a sell order.
-    // 株の数。ネガチブなら、これは売り注文だ。
+    // 株の数。ネガティブなら、これは売り注文だ。
     std::int16_t size;
     EventType type;
 };

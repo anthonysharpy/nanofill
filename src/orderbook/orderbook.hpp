@@ -14,14 +14,14 @@ constexpr std::size_t order_book_size = 500000;
 // 取引のイベント。
 struct OrderBookEntry {
     // Dollar price times 10,000.
-    // 10,000倍したドラの価格。
+    // 10,000倍したドルの価格。
     std::uint32_t price;
     // Seconds after midnight the event happened.
     // イベントが発生したときからの零時から数秒。
     std::uint32_t time;
     std::uint32_t order_id;
-    // 株の数。ネガチブなら、これは売り注文だ。
     // Number of shares. Negative means this is a sell order.
+    // 株の数。ネガチブなら、これは売り注文だ。
     std::int32_t size;
 };
 

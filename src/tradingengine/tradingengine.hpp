@@ -16,14 +16,14 @@ class TradingEngine {
 public:
     // Sum of the value of all orders in 10,000ths of a dollar. This includes both sell and buy orders.
     // E.g. $100 sell and $100 buy would be $200 (2,000,000).
-    // 10,000倍したドラの価格での各注文の価値の合計。売り注文と買い注文が含まれている。たとえば、$100売り注文と
+    // 10,000倍したドルの価格での各注文の価値の合計。売り注文と買い注文が含まれている。たとえば、$100売り注文と
     // $100買い注文は$200になる。
     std::uint64_t total_market_price = 0;
     // Number of shares wanting to be bought or sold.
     // 買ってもらいたいと売ってもらいたい株の合計。
     std::uint64_t market_shares = 0;
     // Current average share price in 10,000ths of a dollar.
-    // 10,000倍したドラの価格での平均株価。
+    // 10,000倍したドルの価格での平均株価。
     std::uint32_t average_share_price = 0;
     // The last execution order we've seen.
     // 直近の実行された注文。
