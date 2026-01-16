@@ -22,7 +22,7 @@ The purpose of this is to demonstrate the implementation of fast, low-latency pr
 
 # Usage
 
-Note that the build process is designed to run on and Linux may require some extra software.
+Note that the build process is designed to run on Linux and may require some extra software.
 
 - **Release build**: `make pgo-gen` -> `make release`
 - **Profile build**: `make pgo-gen` -> `make profile` (may require some extra software)
