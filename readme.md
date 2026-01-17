@@ -37,4 +37,4 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 
 # AI disclaimer
 
-ChatGPT was used in this project for research and looking-up information. **None** of the code or text in this project is AI-generated.
+ChatGPT was used in this project for research and looking-up information. None of the code or text in this project is AI-generated.
