@@ -34,3 +34,8 @@ Once built, simply run the executable.
 # Sources
 
 Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
+
+## Recent Changes
+
+### 19 Feb 2026
+- Fix weird compile error that was probably caused by different standard library versions.

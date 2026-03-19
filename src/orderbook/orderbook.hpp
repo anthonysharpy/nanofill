@@ -2,6 +2,7 @@
 
 #include "events/event.hpp"
 #include <climits>
+#include <cstdlib>
 
 namespace nanofill::orderbook {
 
