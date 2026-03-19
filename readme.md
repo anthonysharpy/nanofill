@@ -39,3 +39,4 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 
 ### 19 Feb 2026
 - Fix weird compile error that was probably caused by different standard library versions.
+- Improve p75 latency by ~4.9% with use of emplace_back instead of push.

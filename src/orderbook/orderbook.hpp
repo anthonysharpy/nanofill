@@ -24,6 +24,13 @@ struct OrderBookEntry {
     // Number of shares. Negative means this is a sell order.
     // 株の数。ネガチブなら、これは売り注文だ。
     std::int32_t size;
+
+    OrderBookEntry(
+        std::uint32_t price,
+        std::uint32_t time,
+        std::uint32_t order_id,
+        std::int32_t size
+    ) : price(price), time(time), order_id(order_id), size(size) {}
 };
 
 // Note that this order book only supports one stock index (in our data - Microsoft).
@@ -189,14 +196,12 @@ private:
         levels_last_modified[event.price] = event.time;
         levels_size[event.price] += std::abs(event.size);
 
-        OrderBookEntry entry = {
-            .price = event.price,
-            .time = event.time,
-            .order_id = event.order_id,
-            .size = event.size
-        };
-
-        levels_orders[event.price].push_back(entry);
+        levels_orders[event.price].emplace_back(
+            event.price,
+            event.time,
+            event.order_id,
+            event.size
+        );
     }
 };
 
