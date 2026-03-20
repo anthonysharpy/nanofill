@@ -19,18 +19,25 @@ void render_latency_chart(std::vector<unsigned int> performance_data) {
     std::sort(sorted_data.begin(), sorted_data.end());
 
     std::vector<unsigned int> p999_data(sorted_data.begin(), sorted_data.begin() + p999_n);
-    unsigned int smallest_latency = p999_data[0];
-    unsigned int highest_latency = p999_data[p999_data.size() - 1];
-    int range = highest_latency - smallest_latency;
-    int band_size = range / chart_rows;
-    std::array<int, chart_rows> frequency_table{};
+
+    // The frequency table will go up in 10ns increments up to 200ns.
+    // 度数表は200nsまで10ns刻みで増加する。
+    constexpr int frequency_table_rows = 20;
+    constexpr int frequency_table_increment_size = 10;
+    std::array<int, frequency_table_rows> frequency_table{};
 
     // Calculate the frequency table.
     // 度数表を計算する。
     for (auto latency : p999_data) {
-        ++frequency_table[std::lround((float)(latency - smallest_latency) / band_size)];
+        unsigned int row = latency / frequency_table_increment_size;
+
+        if (row >= frequency_table_rows) {
+            row = frequency_table_rows-1;
+        }
+
+        ++frequency_table[row];
     }
-    
+
     // Figure out what the highest frequency was.
     // 一番度数が高い度数をチェックする。
     int highest_frequency = 0;
@@ -60,14 +67,15 @@ void render_latency_chart(std::vector<unsigned int> performance_data) {
     std::cout << "===== P99.9 latency distribution =====" << std::endl;
 
     for (std::size_t i = 0; i < frequency_table.size(); ++i) {
-        std::string label = std::to_string(smallest_latency + (i * band_size)) + "ns";
+        std::string label = std::to_string((i + 1) * frequency_table_increment_size) + "ns";
+        
+        if (i == frequency_table_rows-1) {
+            label += "+";
+        }
+        
         label.insert(0, label_size - label.size(), ' ');
 
-        // I think this technically causes a bug where the last column is incorrectly overrepresented,
-        // but the graph's tail is so small that it doesn't really matter in our data.
-        // 厳密には、これで、最後の列が過剰に表現されていてしまい、バグになっていて、表の尾がとても小さいから、
-        // このため、実は問題ない。
-        int bar_width = std::roundl(((float)frequency_table[i] / highest_frequency) * chart_width);
+        int bar_width = std::lroundf((static_cast<float>(frequency_table[i]) / highest_frequency) * chart_width);
         std::string bar(bar_width, '|');
         bar.insert(bar.size(), chart_width - bar.size(), ' ');
 
