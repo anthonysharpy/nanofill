@@ -10,6 +10,7 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <algorithm>
 
 using nanofill::events::Event;
 using nanofill::tradingengine::TradingEngine;
@@ -56,12 +57,19 @@ process_events(const std::vector<Event>& events, TradingEngine& trading_engine, 
     return performance_data;
 }
 
-int main() {
+bool is_benchmark_mode(int argc, char* argv[]) {
+    auto end = argv + argc;
+
+    return std::find_if(
+        argv,
+        end,
+        [](auto x){ return std::strcmp(x, "--benchmark") == 0; }
+    ) != end;
+}
+
+int main(int argc, char* argv[]) {
     std::cout << "Initialising..." << std::endl;
     initialise();
-
-    OrderBook order_book;
-    TradingEngine trading_engine(10000);
 
     std::cout << "Opening data file..." << std::endl;
     std::vector<std::string> file_data = nanofill::fileio::open_text_file("./data/MSFT_2012-06-21_34200000_57600000_message_10.csv");
@@ -70,14 +78,22 @@ int main() {
     auto csv_data = nanofill::fileio::parse_csv_data<nanofill::consts::TradingDataCSVFormat>(file_data);
     std::cout << "Done!" << std::endl;
 
-    // ===== FROM HERE is where we care about performance ===== //
-    // ===== ここから性能が大事だ ===== //
+    int runs = is_benchmark_mode(argc, argv) ? 60 : 1;
+    std::vector<std::vector<unsigned int>> performance_data;
+    performance_data.resize(runs);
 
     auto events = parse_events(csv_data);
-    auto performance_data = process_events(events, trading_engine, order_book);    
 
-    // ===== Don't care about performance after this ===== //
-    // ===== ここから性能がどうでもいい ===== //
+    for (int i = 0; i < runs; ++i) {
+        OrderBook order_book;
+        TradingEngine trading_engine(10000);
+
+        // ===== FROM HERE is where we care about performance ===== //
+        // ===== ここから性能が大事だ ===== //
+        performance_data[i] = process_events(events, trading_engine, order_book);   
+        // ===== Don't care about performance after this ===== //
+        // ===== ここから性能がどうでもいい ===== //
+    }
 
     nanofill::graphics::render_latency_chart(performance_data);
 

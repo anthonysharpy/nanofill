@@ -4,21 +4,80 @@
 #include <limits>
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 
 namespace nanofill::graphics {
 
-// Using the latency performance data we collected, draw a nice chart in the console that
-// shows the latency distribution.
-// さっき収集したレイテンシ性能のデータで、レイテンシ分布を示すために、コンソールでいい表を作ろう。
-void render_latency_chart(std::vector<unsigned int> performance_data) {
-    auto p999_n = performance_data.size() * 0.999;
-
+void print_latency_percentiles(std::vector<std::vector<unsigned int>> performance_data) {
     // Create sorted version of data so we can measure percentiles etc.
     // パーセンタイルを測るために、ソートしたバージョンを作る。
-    auto sorted_data = performance_data;
-    std::sort(sorted_data.begin(), sorted_data.end());
+    for (auto& run_data : performance_data) {
+        std::sort(run_data.begin(), run_data.end());
+    }
 
-    std::vector<unsigned int> p999_data(sorted_data.begin(), sorted_data.begin() + p999_n);
+    float p0{}, p50{}, p75{}, p90{}, p95{}, p99{}, p999{}, p100{};
+
+    for (auto& run_data : performance_data) {
+        p0 += run_data[0];
+        p50 += run_data[std::roundl(run_data.size() * 0.5)];
+        p75 += run_data[std::roundl(run_data.size() * 0.75)];
+        p90 += run_data[std::roundl(run_data.size() * 0.90)];
+        p95 += run_data[std::roundl(run_data.size() * 0.95)];
+        p99 += run_data[std::roundl(run_data.size() * 0.99)];
+        p999 += run_data[std::roundl(run_data.size() * 0.999)];
+        p100 += run_data[std::roundl(run_data.size() - 1)];
+    }
+
+    p0 /= performance_data.size();
+    p50 /= performance_data.size();
+    p75 /= performance_data.size();
+    p90 /= performance_data.size();
+    p95 /= performance_data.size();
+    p99 /= performance_data.size();
+    p999 /= performance_data.size();
+    p100 /= performance_data.size();
+
+    // Print stats.
+    // 統計情報を出力する。
+    std::cout << "===== Per-event latency percentiles =====\n"
+        << "P0: " << p0 << "ns\n"
+        << "P50: " << p50 << "ns\n"
+        << "P75: " << p75 << "ns\n"
+        << "P90: " << p90 << "ns\n"
+        << "P95: " << p95 << "ns\n"
+        << "P99: " << p99 << "ns\n"
+        << "P99.9: " << p999 << "ns\n"
+        << "P100: " << p100 << "ns\n\n";
+}
+
+void print_latency_distribution(std::vector<std::vector<unsigned int>> performance_data) {
+    // Flatten vectors into a single vector.
+    // Vectorを一つのvectorにまとめる。
+    std::vector<unsigned int> combined_data;
+    combined_data.reserve(performance_data.size() * performance_data[0].size());
+
+    for (auto& data : performance_data) {
+        combined_data.insert(
+            combined_data.end(),
+            std::make_move_iterator(data.begin()),
+            std::make_move_iterator(data.end())
+        );
+    }
+
+    // Sort.
+    // 並べ替える。
+    std::sort(combined_data.begin(), combined_data.end());
+
+    // Keep only p99.9 data.
+    // p99.9データしか要らない。
+    std::vector<unsigned int> p999_data;
+    p999_data.reserve(combined_data.size() * 0.999);
+
+    p999_data.insert(
+        p999_data.end(),
+        std::make_move_iterator(combined_data.begin()),
+        std::make_move_iterator(combined_data.end())
+    );
 
     // The frequency table will go up in 10ns increments up to 200ns.
     // 度数表は200nsまで10ns刻みで増加する。
@@ -48,23 +107,9 @@ void render_latency_chart(std::vector<unsigned int> performance_data) {
         }
     }
 
-    // Print stats.
-    // 統計情報を出力する。
-    std::cout << std::endl
-        << "===== Per-event latency percentiles =====" << std::endl
-        << "P0: " << sorted_data[0] << "ns" << std::endl
-        << "P50: " << sorted_data[std::roundl(sorted_data.size() * 0.5)] << "ns" << std::endl
-        << "P75: " << sorted_data[std::roundl(sorted_data.size() * 0.75)] << "ns" << std::endl
-        << "P90: " << sorted_data[std::roundl(sorted_data.size() * 0.90)] << "ns" << std::endl
-        << "P95: " << sorted_data[std::roundl(sorted_data.size() * 0.95)] << "ns" << std::endl
-        << "P99: " << sorted_data[std::roundl(sorted_data.size() * 0.99)] << "ns" << std::endl
-        << "P99.9: " << sorted_data[std::roundl(sorted_data.size() * 0.999)] << "ns" << std::endl
-        << "P100: " << sorted_data[std::roundl(sorted_data.size() - 1)] << "ns" << std::endl
-        << std::endl;
-
     // Print the frequency table.
     // 度数表を出力する。
-    std::cout << "===== P99.9 latency distribution =====" << std::endl;
+    std::cout << "===== P99.9 latency distribution =====\n";
 
     for (std::size_t i = 0; i < frequency_table.size(); ++i) {
         std::string label = std::to_string((i + 1) * frequency_table_increment_size) + "ns";
@@ -81,8 +126,36 @@ void render_latency_chart(std::vector<unsigned int> performance_data) {
 
         std::string n = "(" + std::to_string(frequency_table[i]) + ")";
 
-        std::cout << label << " | " << bar << " | " << n << std::endl;
+        std::cout << label << " | " << bar << " | " << n << "\n";
     }
+}
+
+void print_stats(std::vector<std::vector<unsigned int>> performance_data) {
+    std::uint64_t total = 0;
+    std::uint64_t event_count = 0;
+
+    for (auto& run: performance_data) {
+        for (auto& time : run) {
+            total += time;
+            ++event_count;
+        }
+    }
+
+    double average = static_cast<double>(total) / event_count;
+
+    std::cout << "===== Stats =====\n"
+        << "Average event time: " << average << "ns\n\n";
+}
+
+// Using the latency performance data we collected, draw a nice chart in the console that
+// shows the latency distribution.
+// さっき収集したレイテンシ性能のデータで、レイテンシ分布を示すために、コンソールでいい表を作ろう。
+void render_latency_chart(std::vector<std::vector<unsigned int>>& performance_data) {
+    std::cout << "\n";
+
+    print_stats(performance_data);
+    print_latency_percentiles(performance_data);
+    print_latency_distribution(performance_data);
 }
 
 }

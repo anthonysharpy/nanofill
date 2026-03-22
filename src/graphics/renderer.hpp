@@ -9,6 +9,6 @@ constexpr int chart_width = 60;
 // 表の目盛りの広さ。
 constexpr int label_size = 8;
 
-void render_latency_chart(std::vector<unsigned int> performance_data);
+void render_latency_chart(std::vector<std::vector<unsigned int>>& performance_data);
 
 }
