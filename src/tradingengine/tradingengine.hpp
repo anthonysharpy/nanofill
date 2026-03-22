@@ -76,9 +76,8 @@ private:
         // to look it up.
         // 削除のイベントなどはいつも正しいイベントのサイズを含められて、検索する必要がない。
 
-        auto abs_size = std::abs(event.size);
-        total_market_price -= abs_size * event.price;
-        market_shares -= abs_size;
+        total_market_price -= event.size * event.price;
+        market_shares -= event.size;
 
         if (market_shares > 0) {
             average_share_price = total_market_price / market_shares;
@@ -93,9 +92,8 @@ private:
 
     [[gnu::always_inline]]
     void process_order_added_event(const Event event) noexcept {
-        auto abs_size = std::abs(event.size);
-        total_market_price += abs_size * event.price;
-        market_shares += abs_size;
+        total_market_price += event.size * event.price;
+        market_shares += event.size;
 
         if (market_shares > 0) {
             average_share_price = total_market_price / market_shares;

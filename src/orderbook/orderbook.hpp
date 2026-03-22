@@ -125,7 +125,7 @@ private:
     [[gnu::always_inline]]
     void remove_order_with_index(const Event event, const unsigned int index) noexcept {
         levels_last_modified[event.price] = event.time;
-        levels_size[event.price] -= std::abs(event.size);
+        levels_size[event.price] -= event.size;
         levels_orders[event.price][index] = levels_orders[event.price].back();
         levels_orders[event.price].pop_back();
     }
@@ -182,8 +182,8 @@ private:
             return false;
         }
 
-        levels_size[event.price] -= std::abs(event.size);
-        current_event->size -= event.size * (1 - 2 * (current_event->size < 0));
+        levels_size[event.price] -= event.size;
+        current_event->size -= event.get_size_with_direction();
         levels_last_modified[event.price] = event.time;
 
         return true;
@@ -194,13 +194,13 @@ private:
     [[gnu::always_inline]]
     void insert_order(const Event event) noexcept {
         levels_last_modified[event.price] = event.time;
-        levels_size[event.price] += std::abs(event.size);
+        levels_size[event.price] += event.size;
 
         levels_orders[event.price].emplace_back(
             event.price,
             event.time,
             event.order_id,
-            event.size
+            event.get_size_with_direction()
         );
     }
 };

@@ -1,8 +1,10 @@
 #include "gtest/gtest.h"
 #include "orderbook/orderbook.hpp"
+#include "events/event.hpp"
 
 using nanofill::events::Event;
 using nanofill::events::EventType;
+using nanofill::events::TradeDirection;
 using nanofill::orderbook::OrderBook;
 
 TEST(OrderBook, ProcessSubmissionEvent) {
@@ -13,6 +15,7 @@ TEST(OrderBook, ProcessSubmissionEvent) {
         .time = 100,
         .order_id = 1000,
         .size = 10,
+        .direction = TradeDirection::Positive,
         .type = EventType::Submission
     };
 
@@ -37,7 +40,8 @@ TEST(OrderBook, ProcessSubmissionEvent) {
         .price = 10,
         .time = 105,
         .order_id = 1001,
-        .size = -10,
+        .size = 10,
+        .direction = TradeDirection::Negative,
         .type = EventType::Submission
     };
 
@@ -67,6 +71,7 @@ TEST(OrderBook, ProcessCancellationEvent) {
         .time = 105,
         .order_id = 1000,
         .size = 3,
+        .direction = TradeDirection::Positive,
         .type = EventType::Cancellation
     };
 
@@ -78,6 +83,7 @@ TEST(OrderBook, ProcessCancellationEvent) {
         .time = 100,
         .order_id = 1000,
         .size = 10,
+        .direction = TradeDirection::Positive,
         .type = EventType::Submission
     };
 
@@ -104,6 +110,7 @@ TEST(OrderBook, ProcessCancellationEventChangesEventSizeCorrectly) {
         .time = 100,
         .order_id = 1000,
         .size = 10,
+        .direction = TradeDirection::Positive,
         .type = EventType::Submission
     };
 
@@ -118,6 +125,7 @@ TEST(OrderBook, ProcessCancellationEventChangesEventSizeCorrectly) {
         .time = 105,
         .order_id = 1000,
         .size = 3,
+        .direction = TradeDirection::Positive,
         .type = EventType::Cancellation
     };
 
@@ -127,13 +135,13 @@ TEST(OrderBook, ProcessCancellationEventChangesEventSizeCorrectly) {
 
     ASSERT_EQ(entries[0].size, 7);
 
-    // This event has a negative size, make sure it's handled correctly.
-
+    // Sell event, make sure it's handled correctly.
     Event submission_event2 {
         .price = 10,
         .time = 100,
         .order_id = 1001,
-        .size = -10,
+        .size = 10,
+        .direction = TradeDirection::Negative,
         .type = EventType::Submission
     };
 
@@ -143,11 +151,12 @@ TEST(OrderBook, ProcessCancellationEventChangesEventSizeCorrectly) {
 
     ASSERT_EQ(entries[1].size, -10);
 
-        Event cancellation_event2 {
+    Event cancellation_event2 {
         .price = 10,
         .time = 105,
         .order_id = 1001,
         .size = 3,
+        .direction = TradeDirection::Negative,
         .type = EventType::Cancellation
     };
 
@@ -166,6 +175,7 @@ TEST(OrderBook, ProcessVisibleExecutionEvent) {
         .time = 105,
         .order_id = 1000,
         .size = 0,
+        .direction = TradeDirection::Positive,
         .type = EventType::ExecutionVisible
     };
 
@@ -177,6 +187,7 @@ TEST(OrderBook, ProcessVisibleExecutionEvent) {
         .time = 100,
         .order_id = 1000,
         .size = 10,
+        .direction = TradeDirection::Positive,
         .type = EventType::Submission
     };
 
@@ -199,6 +210,7 @@ TEST(OrderBook, ProcessDeletionEvent) {
         .time = 105,
         .order_id = 1000,
         .size = 0,
+        .direction = TradeDirection::Positive,
         .type = EventType::Deletion
     };
 
@@ -210,6 +222,7 @@ TEST(OrderBook, ProcessDeletionEvent) {
         .time = 100,
         .order_id = 1000,
         .size = 10,
+        .direction = TradeDirection::Positive,
         .type = EventType::Submission
     };
 

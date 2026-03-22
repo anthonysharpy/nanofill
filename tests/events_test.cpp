@@ -23,9 +23,9 @@ TEST(Events, EventsFromCSVData) {
     ASSERT_EQ(events[1].price, 24990U);
     ASSERT_EQ(events[2].price, 25010U);
 
-    ASSERT_EQ(events[0].size, 10);
-    ASSERT_EQ(events[1].size, -5);
-    ASSERT_EQ(events[2].size, 20);
+    ASSERT_EQ(events[0].get_size_with_direction(), 10);
+    ASSERT_EQ(events[1].get_size_with_direction(), -5);
+    ASSERT_EQ(events[2].get_size_with_direction(), 20);
 
     ASSERT_EQ(events[0].time, 0U);
     ASSERT_EQ(events[1].time, 500U);

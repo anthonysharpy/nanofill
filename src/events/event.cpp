@@ -12,7 +12,7 @@ void print_event(const Event event) {
     std::cout << "orderid=" << event.order_id
         << "time=" << event.time
         << "price=" << event.price
-        << "size=" << event.size
+        << "size=" << event.get_size_with_direction()
         << "type=" << static_cast<int>(event.type)
         << std::endl;
 }
@@ -28,7 +28,8 @@ events_from_csv_data(const std::vector<consts::TradingDataCSVFormat>& csv_data) 
         events[i].time = std::get<0>(event_data);
         events[i].type = static_cast<EventType>(std::get<1>(event_data));
         events[i].order_id = std::get<2>(event_data);
-        events[i].size = std::get<3>(event_data) * std::get<5>(event_data);
+        events[i].size = std::get<3>(event_data);
+        events[i].direction = static_cast<TradeDirection>(std::get<5>(event_data));
         events[i].price = std::get<4>(event_data);
     }
 

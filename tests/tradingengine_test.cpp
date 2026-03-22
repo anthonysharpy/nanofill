@@ -3,6 +3,7 @@
 
 using nanofill::events::Event;
 using nanofill::events::EventType;
+using nanofill::events::TradeDirection;
 using nanofill::tradingengine::TradingEngine;
 
 TEST(TradingEngine, ProcessAllEvents) {
@@ -14,6 +15,7 @@ TEST(TradingEngine, ProcessAllEvents) {
         .time = 100,
         .order_id = 1000,
         .size = 10,
+        .direction = TradeDirection::Positive,
         .type = EventType::Submission
     };
 
@@ -37,7 +39,8 @@ TEST(TradingEngine, ProcessAllEvents) {
         .price = 20,
         .time = 105,
         .order_id = 1001,
-        .size = -10,
+        .size = 10,
+        .direction = TradeDirection::Negative,
         .type = EventType::Submission
     };
 
@@ -56,6 +59,7 @@ TEST(TradingEngine, ProcessAllEvents) {
         .time = 110,
         .order_id = 1001,
         .size = 5,
+        .direction = TradeDirection::Negative,
         .type = EventType::Cancellation
     };
 
@@ -74,6 +78,7 @@ TEST(TradingEngine, ProcessAllEvents) {
         .time = 115,
         .order_id = 1001,
         .size = 5,
+        .direction = TradeDirection::Positive,
         .type = EventType::Deletion
     };
 
@@ -92,6 +97,7 @@ TEST(TradingEngine, ProcessAllEvents) {
         .time = 120,
         .order_id = 1000,
         .size = 5,
+        .direction = TradeDirection::Positive,
         .type = EventType::ExecutionVisible
     };
 
@@ -118,6 +124,7 @@ TEST(TradingEngine, ProcessAllEvents) {
         .time = 120,
         .order_id = 1000,
         .size = 5,
+        .direction = TradeDirection::Positive,
         .type = EventType::ExecutionHidden
     };
 
@@ -147,6 +154,7 @@ TEST(TradingEngine, DoesntCrashWhenSharesReachZero) {
         .time = 100,
         .order_id = 1000,
         .size = 10,
+        .direction = TradeDirection::Positive,
         .type = EventType::Submission
     };
 
@@ -160,6 +168,7 @@ TEST(TradingEngine, DoesntCrashWhenSharesReachZero) {
         .time = 115,
         .order_id = 1000,
         .size = 10,
+        .direction = TradeDirection::Positive,
         .type = EventType::Deletion
     };
 

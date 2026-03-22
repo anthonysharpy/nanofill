@@ -7,6 +7,11 @@
 
 namespace nanofill::events {
 
+enum class TradeDirection: std::int8_t {
+    Positive = 1,
+    Negative = -1,
+};
+
 enum class EventType : std::uint8_t {
     // Submission of a new limit order.
     // 新しい指値注文の出し。
@@ -44,10 +49,16 @@ struct Event {
     // イベントが発生したときからの零時から数秒。
     std::uint32_t time;
     std::uint32_t order_id;
-    // Number of shares. Negative means this is a sell order.
+    // Number of shares.
     // 株の数。ネガティブなら、これは売り注文だ。
-    std::int16_t size;
+    std::uint8_t size;
+    TradeDirection direction;
     EventType type;
+
+    [[gnu::always_inline]]
+    std::int16_t get_size_with_direction() const noexcept {
+        return static_cast<std::int16_t>(size) * static_cast<std::int16_t>(direction);
+    }
 };
 
 std::vector<Event>

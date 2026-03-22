@@ -41,6 +41,7 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 ### 22 Mar 2026
 - Add --benchmark flag that repeats the program multiple times for more thorough benchmarking.
 - Add average event time to status output.
+- Store event size as an unsigned int, and store whether this is negative or positive separately in the struct. Decrease average event processing time by 0.34%. P50 gets a ~1ns reduction, at the cost of P75+ being ~2ns slower.
 
 ### 20 Mar 2026
 - Use fixed 10ns intervals on latency graph for easier run-by-run comparison.
