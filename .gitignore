@@ -5,3 +5,4 @@ build/
 pgodata/
 unit_tests
 nanofillmain
+assembly.asm

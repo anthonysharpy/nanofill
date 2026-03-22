@@ -4,6 +4,7 @@
 # Profile build: make pgo-gen -> make profile
 # Run tests: make test
 # Normal build (not recommended): make
+# Dump assembly: make assembly
 #
 # NOTE: profile build may require some extra software.
 #
@@ -31,6 +32,7 @@ PROFILE_COMPILE_FLAGS  = $(BASE_COMPILE_FLAGS) -g -fno-omit-frame-pointer -fprof
 PROFILE_LINK_FLAGS = $(BASE_LINK_FLAGS) -fprofile-use=pgodata
 PGO_COMPILE_FLAGS = $(BASE_COMPILE_FLAGS) -fprofile-generate=pgodata
 PGO_LINK_FLAGS = $(BASE_LINK_FLAGS) -fprofile-generate=pgodata
+DUMP_ASSEMBLY_COMPILE_FLAGS = $(RELEASE_COMPILE_FLAGS) -g
 
 # ===== Vars ===== #
 
@@ -56,7 +58,7 @@ GTEST_BUILT = $(GTEST_BUILD_DIR)/.built
 
 # ===== Build ===== #
 
-.PHONY: clean profile pgo-gen release test
+.PHONY: clean profile pgo-gen release test assembly
 
 all: $(BINARY_NAME)
 
@@ -90,6 +92,14 @@ profile: clean
 	$(MAKE) all COMPILE_FLAGS="$(PROFILE_COMPILE_FLAGS)" LINK_FLAGS="$(PROFILE_LINK_FLAGS)"
 	sudo perf record -F 16000 -g -- ./$(BINARY_NAME)
 	sudo hotspot perf.data
+
+# ==== Dump Assembly ==== #
+
+assembly: clean
+	$(MAKE) pgo-gen
+	$(MAKE) all COMPILE_FLAGS="$(DUMP_ASSEMBLY_COMPILE_FLAGS)" LINK_FLAGS="$(RELEASE_LINK_FLAGS)"
+	rm -f assembly.asm
+	objdump -d -M intel -C -l ./nanofill | sed 's|.*/src/||' >> assembly.asm
 
 # ===== Run/Build Tests ===== #
 
