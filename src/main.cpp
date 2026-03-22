@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
 
     auto events = parse_events(csv_data);
 
-    std::cout << "Processing " << events.size() << " events " << runs << "times...\n";
+    std::cout << "Processing " << events.size() << " events " << runs << " times..." << std::endl;
 
     for (int i = 0; i < runs; ++i) {
         OrderBook order_book;
