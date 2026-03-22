@@ -40,8 +40,6 @@ process_events(const std::vector<Event>& events, TradingEngine& trading_engine, 
     performance_data.resize(events.size());
     SPSCRingBuffer<Event, 1024> buffer;
     
-    std::cout << "Processing " << events.size() << " events..." << std::endl;
-
     std::thread event_producer_thread(nanofill::threads::event_producer<1024>, std::ref(buffer), std::ref(events));
     std::thread event_consumer_thread(
         nanofill::threads::event_consumer<1024>,
@@ -52,8 +50,6 @@ process_events(const std::vector<Event>& events, TradingEngine& trading_engine, 
     event_producer_thread.join();
     event_consumer_thread.join();
     
-    std::cout << "Done!" << std::endl;
-
     return performance_data;
 }
 
@@ -84,6 +80,8 @@ int main(int argc, char* argv[]) {
 
     auto events = parse_events(csv_data);
 
+    std::cout << "Processing " << events.size() << " events " << runs << "times...\n";
+
     for (int i = 0; i < runs; ++i) {
         OrderBook order_book;
         TradingEngine trading_engine(10000);
@@ -94,6 +92,8 @@ int main(int argc, char* argv[]) {
         // ===== Don't care about performance after this ===== //
         // ===== ここから性能がどうでもいい ===== //
     }
+
+    std::cout << "Done!\n";
 
     nanofill::graphics::render_latency_chart(performance_data);
 
