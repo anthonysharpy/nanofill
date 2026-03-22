@@ -1,7 +1,7 @@
 # ==================== HOW TO USE ==================== #
 #
-# Release build: make pgo-gen -> make release
-# Profile build: make pgo-gen -> make profile
+# Release build: make release
+# Profile build: make profile
 # Run tests: make test
 # Normal build (not recommended): make
 # Dump assembly: make assembly
@@ -74,8 +74,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 # ===== Build (Release) ===== #
 
-release:
-	$(MAKE) clean
+release: pgo-gen
 	$(MAKE) all COMPILE_FLAGS="$(RELEASE_COMPILE_FLAGS)" LINK_FLAGS="$(RELEASE_LINK_FLAGS)"
 
 # ===== Performance-Guided Optimisation ===== #
@@ -88,7 +87,7 @@ pgo-gen: clean
 
 # ===== Profile ===== #
 
-profile: clean
+profile: pgo-gen
 	$(MAKE) all COMPILE_FLAGS="$(PROFILE_COMPILE_FLAGS)" LINK_FLAGS="$(PROFILE_LINK_FLAGS)"
 	sudo perf record -F 16000 -g -- ./$(BINARY_NAME)
 	sudo hotspot perf.data
