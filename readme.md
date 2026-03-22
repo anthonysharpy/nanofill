@@ -37,9 +37,13 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 
 ## Recent Changes
 
+### 22 Mar 2026
+- Add --benchmark flag that repeats the program multiple times for more thorough benchmarking.
+- Add average event time to status output.
+
 ### 20 Mar 2026
 - Use fixed 10ns intervals on latency graph for easier run-by-run comparison.
 
 ### 19 Mar 2026
 - Fix weird compile error that was probably caused by different standard library versions.
-- Improve p75 latency by ~4.9% with use of emplace_back instead of push.
+- Improve average event time by ~1.1% with use of emplace_back instead of push.
