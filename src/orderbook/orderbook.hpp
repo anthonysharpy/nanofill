@@ -30,7 +30,7 @@ struct OrderBookEntry {
         std::uint32_t time,
         std::uint32_t order_id,
         std::int32_t size
-    ) : price(price), time(time), order_id(order_id), size(size) {}
+    ) : price{price}, time{time}, order_id{order_id}, size{size} {}
 };
 
 // Note that this order book only supports one stock index (in our data - Microsoft).
