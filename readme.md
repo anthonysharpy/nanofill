@@ -38,6 +38,9 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 
 ## Recent Changes
 
+### 24 Mar 2026
+- Add benchmarking script.
+
 ### 22 Mar 2026
 - Add --benchmark flag that repeats the program multiple times for more thorough benchmarking.
 - Add average event time to status output.
