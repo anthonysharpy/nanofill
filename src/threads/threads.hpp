@@ -18,20 +18,13 @@ using events::Event;
 // イベントバッファにイベントを入れる。
 template<size_t N>
 void event_producer(SPSCRingBuffer<Event, N>& event_buffer, const std::vector<Event>& events) noexcept {
-    // I don't know why but the profiler said that using pointers was faster than the [] operator.
-    // 理由が分からないけど、プロファイラによって、[]を使うのより、ポインタを使うほうが速い。
-
-    auto position = &events[0];
-    auto end = position + events.size();
-
     // It is much more efficient to push multiple events at once, however I've not done that as
     // it's sort-of cheating... in the real world, events come in one by one (usually). We also
     // don't want to wait for more events before pushing as that would introduce latency.
     // 複数のイベントを一発で入れるほうが速いが、そうするとちょっと狡いので、遠慮した。本当の世界では、イベントが
     // 一つずつ来る。その上、イベントが溜まるのを待つと、遅延が増えってしまう。
-    while (position != end) {
-        while (!event_buffer.push(*position)) {}
-        ++position;
+    for (const auto& event : events) {
+        while (!event_buffer.push(event)) {}
     }
 }
 
