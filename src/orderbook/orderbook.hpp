@@ -155,16 +155,10 @@ private:
     // この価格とIDがある注文のポインタを返す。ないと、nullptrを返す。
     [[gnu::always_inline]]
     OrderBookEntry* get_order_by_price_and_id(const std::uint32_t price, const std::uint32_t order_id) noexcept {
-        auto start = &levels_orders[price][0];
-        auto position = start;
-        auto end = start + levels_orders[price].size();
-
-        while (position != end) {
-            if (position->order_id == order_id) {
-                return position;
+        for (auto& order : levels_orders[price]) {
+            if (order.order_id == order_id) {
+                return &order;
             }
-
-            ++position;
         }
 
         return nullptr;
