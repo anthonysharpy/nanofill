@@ -114,7 +114,7 @@ TEST(TradingEngine, ProcessAllEvents) {
 
     ASSERT_EQ(trading_engine.last_execution_order.order_id, 1000U);
     ASSERT_EQ(trading_engine.last_execution_order.price, 10U);
-    ASSERT_EQ(trading_engine.last_execution_order.size, 5);
+    ASSERT_EQ(trading_engine.last_execution_order.size, 5U);
     ASSERT_EQ(trading_engine.last_execution_order.time, 120U);
     ASSERT_EQ(trading_engine.last_execution_order.type, EventType::ExecutionVisible);
 
@@ -140,7 +140,7 @@ TEST(TradingEngine, ProcessAllEvents) {
 
     ASSERT_EQ(trading_engine.last_execution_order.order_id, 1000U);
     ASSERT_EQ(trading_engine.last_execution_order.price, 10U);
-    ASSERT_EQ(trading_engine.last_execution_order.size, 5);
+    ASSERT_EQ(trading_engine.last_execution_order.size, 5U);
     ASSERT_EQ(trading_engine.last_execution_order.time, 120U);
     ASSERT_EQ(trading_engine.last_execution_order.type, EventType::ExecutionVisible);
 }
