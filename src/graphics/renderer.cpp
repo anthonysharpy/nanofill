@@ -8,7 +8,7 @@
 
 namespace nanofill::graphics {
 
-void print_latency_percentiles(std::vector<std::vector<unsigned int>> performance_data) {
+void print_latency_percentiles(std::vector<std::vector<std::uint32_t>> performance_data) {
     // Create sorted version of data so we can measure percentiles etc.
     // パーセンタイルを測るために、ソートしたバージョンを作る。
     for (auto& run_data : performance_data) {
@@ -50,10 +50,10 @@ void print_latency_percentiles(std::vector<std::vector<unsigned int>> performanc
         << "P100: " << p100 << "ns\n\n";
 }
 
-void print_latency_distribution(std::vector<std::vector<unsigned int>> performance_data) {
+void print_latency_distribution(std::vector<std::vector<std::uint32_t>> performance_data) {
     // Flatten vectors into a single vector.
     // Vectorを一つのvectorにまとめる。
-    std::vector<unsigned int> combined_data;
+    std::vector<std::uint32_t> combined_data;
     combined_data.reserve(performance_data.size() * performance_data[0].size());
 
     for (auto& data : performance_data) {
@@ -70,7 +70,7 @@ void print_latency_distribution(std::vector<std::vector<unsigned int>> performan
 
     // Keep only p99.9 data.
     // p99.9データしか要らない。
-    std::vector<unsigned int> p999_data;
+    std::vector<std::uint32_t> p999_data;
     p999_data.reserve(combined_data.size() * 0.999);
 
     p999_data.insert(
@@ -130,7 +130,7 @@ void print_latency_distribution(std::vector<std::vector<unsigned int>> performan
     }
 }
 
-void print_stats(std::vector<std::vector<unsigned int>> performance_data) {
+void print_stats(std::vector<std::vector<std::uint32_t>> performance_data) {
     std::uint64_t total = 0;
     std::uint64_t event_count = 0;
 
@@ -150,7 +150,7 @@ void print_stats(std::vector<std::vector<unsigned int>> performance_data) {
 // Using the latency performance data we collected, draw a nice chart in the console that
 // shows the latency distribution.
 // さっき収集したレイテンシ性能のデータで、レイテンシ分布を示すために、コンソールでいい表を作ろう。
-void render_latency_chart(std::vector<std::vector<unsigned int>>& performance_data) {
+void render_latency_chart(std::vector<std::vector<std::uint32_t>>& performance_data) {
     std::cout << "\n";
 
     print_stats(performance_data);

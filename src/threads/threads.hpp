@@ -35,14 +35,14 @@ void event_consumer(
     SPSCRingBuffer<Event, N>& event_buffer,
     OrderBook& order_book,
     TradingEngine& trading_engine,
-    std::vector<unsigned int>& performance_data
+    std::vector<std::uint32_t>& performance_data
 ) noexcept {
-    std::size_t events_consumed = 0;
+    std::uint32_t events_consumed = 0;
     Event events[8];
-    unsigned int events_found = 0;
+    std::uint8_t events_found = 0;
+    std::uint8_t i = 0;
     std::chrono::steady_clock::time_point clock_start;
     std::chrono::steady_clock::time_point clock_end;
-    unsigned int i = 0;
 
     // Consume all the events. We'll stop when we've processed them all. In the real world,
     // this would keep going.

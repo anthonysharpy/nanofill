@@ -34,9 +34,9 @@ std::vector<Event> parse_events(const std::vector<nanofill::consts::TradingDataC
     return events;
 }
 
-std::vector<unsigned int>
+std::vector<std::uint32_t>
 process_events(const std::vector<Event>& events, TradingEngine& trading_engine, OrderBook& order_book) {
-    std::vector<unsigned int> performance_data;
+    std::vector<std::uint32_t> performance_data;
     performance_data.resize(events.size());
     SPSCRingBuffer<Event, 1024> buffer;
     
@@ -48,7 +48,7 @@ process_events(const std::vector<Event>& events, TradingEngine& trading_engine, 
         std::ref(trading_engine),
         std::ref(performance_data)
     );
-    
+
     event_producer_thread.join();
     event_consumer_thread.join();
     
@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Done!" << std::endl;
 
     int runs = is_benchmark_mode(argc, argv) ? 60 : 1;
-    std::vector<std::vector<unsigned int>> performance_data;
+    std::vector<std::vector<std::uint32_t>> performance_data;
     performance_data.resize(runs);
 
     auto events = parse_events(csv_data);
