@@ -37,7 +37,7 @@ public:
     
     TradingEngine(const int price_spread) noexcept;
 
-    [[gnu::always_inline]] inline
+    [[gnu::always_inline]]
     void process_event(const Event event) noexcept {
         if (event.type == EventType::Submission) {
             process_order_added_event(event);
