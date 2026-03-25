@@ -61,12 +61,7 @@ private:
     // 時価が変わって、ポジションを更新しよう。
     [[gnu::always_inline]]
     void update_position() noexcept {
-        if (price_spread > average_share_price) {
-            target_buy_price = 0;
-        } else {
-            target_buy_price = average_share_price - price_spread;
-        }
-
+        target_buy_price = price_spread > average_share_price ? 0 : average_share_price - price_spread;
         target_sell_price = average_share_price + price_spread;
     }
 
@@ -79,11 +74,7 @@ private:
         total_market_price -= event.size * event.price;
         market_shares -= event.size;
 
-        if (market_shares > 0) {
-            average_share_price = total_market_price / market_shares;
-        } else {
-            average_share_price = 0;
-        }
+        average_share_price = market_shares > 0 ? total_market_price / market_shares : 0;
 
         if (event.type == EventType::ExecutionHidden || event.type == EventType::ExecutionVisible) {
             last_execution_order = event;
