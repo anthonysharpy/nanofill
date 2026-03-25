@@ -210,8 +210,14 @@ done
 run_count=0
 
 while true; do
-    run_binary "nanofillmain"
-    run_binary "nanofill"
+    if (( run_count % 2 == 0 )); then
+        run_binary "nanofillmain"
+        run_binary "nanofill"
+    else
+        run_binary "nanofill"
+        run_binary "nanofillmain"
+    fi
+
     run_count=$(( run_count + 1 ))
     draw_table "$run_count"
 done

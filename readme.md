@@ -29,6 +29,7 @@ Note that the build process is designed to run on Linux and may require some ext
 - **Run tests**: `make test`
 - **Normal build (not recommended)**: `make`
 - **Dump assembly to file**: `make assembly`
+- **Build for benchmarking**: `make benchmark`
 
 Once built, simply run the executable.
 

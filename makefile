@@ -5,6 +5,7 @@
 # Run tests: make test
 # Normal build (not recommended): make
 # Dump assembly: make assembly
+# Build for benchmarking: make benchmark
 #
 # NOTE: profile build may require some extra software.
 #
@@ -33,6 +34,8 @@ PROFILE_LINK_FLAGS = $(BASE_LINK_FLAGS) -fprofile-use=pgodata
 PGO_COMPILE_FLAGS = $(BASE_COMPILE_FLAGS) -fprofile-generate=pgodata
 PGO_LINK_FLAGS = $(BASE_LINK_FLAGS) -fprofile-generate=pgodata
 DUMP_ASSEMBLY_COMPILE_FLAGS = $(RELEASE_COMPILE_FLAGS) -g
+BENCHMARK_COMPILE_FLAGS = $(BASE_COMPILE_FLAGS)
+BENCHMARK_LINK_FLAGS = $(BASE_LINK_FLAGS)
 
 # ===== Vars ===== #
 
@@ -58,7 +61,7 @@ GTEST_BUILT = $(GTEST_BUILD_DIR)/.built
 
 # ===== Build ===== #
 
-.PHONY: clean profile pgo-gen release test assembly
+.PHONY: clean profile pgo-gen release test assembly benchmark
 
 all: $(BINARY_NAME)
 
@@ -76,6 +79,11 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 release: pgo-gen
 	$(MAKE) all COMPILE_FLAGS="$(RELEASE_COMPILE_FLAGS)" LINK_FLAGS="$(RELEASE_LINK_FLAGS)"
+
+# ===== Benchmark build ===== #
+
+benchmark: clean
+	$(MAKE) all COMPILE_FLAGS="$(BENCHMARK_COMPILE_FLAGS)" LINK_FLAGS="$(BENCHMARK_LINK_FLAGS)"
 
 # ===== Performance-Guided Optimisation ===== #
 
