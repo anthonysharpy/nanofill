@@ -63,6 +63,57 @@ TEST(OrderBook, ProcessSubmissionEvent) {
     ASSERT_EQ(orders[1].time, 105U);
 }
 
+TEST(OrderBook, ProcessBigSubmissionEvent) {
+    auto orderbook = OrderBook();
+
+    Event event {
+        .price = 10,
+        .time = 100,
+        .order_id = 1000,
+        .size = 200000U,
+        .direction = TradeDirection::Positive,
+        .type = EventType::Submission
+    };
+
+    ASSERT_TRUE(orderbook.process_event(event));
+
+    ASSERT_EQ(200000U, orderbook.get_total_order_size_for_price(10));
+
+    auto orders = orderbook.get_orders_for_price(10);
+
+    ASSERT_EQ(1U, orders.size());
+    ASSERT_EQ(orders[0].order_id, 1000U);
+    ASSERT_EQ(orders[0].price, 10U);
+    ASSERT_EQ(orders[0].size, 200000);
+    ASSERT_EQ(orders[0].time, 100U);
+
+    Event event2 {
+        .price = 10,
+        .time = 105,
+        .order_id = 1001,
+        .size = 200000U,
+        .direction = TradeDirection::Negative,
+        .type = EventType::Submission
+    };
+
+    ASSERT_TRUE(orderbook.process_event(event2));
+
+    ASSERT_EQ(105U, orderbook.get_last_modified_for_price(10));
+    ASSERT_EQ(400000U, orderbook.get_total_order_size_for_price(10));
+
+    orders = orderbook.get_orders_for_price(10);
+
+    ASSERT_EQ(2U, orders.size());
+    ASSERT_EQ(orders[0].order_id, 1000U);
+    ASSERT_EQ(orders[0].price, 10U);
+    ASSERT_EQ(orders[0].size, 200000);
+    ASSERT_EQ(orders[0].time, 100U);
+    ASSERT_EQ(orders[1].order_id, 1001U);
+    ASSERT_EQ(orders[1].price, 10U);
+    ASSERT_EQ(orders[1].size, -200000);
+    ASSERT_EQ(orders[1].time, 105U);
+}
+
 TEST(OrderBook, ProcessCancellationEvent) {
     auto orderbook = OrderBook();
 

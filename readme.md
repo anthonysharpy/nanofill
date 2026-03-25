@@ -43,6 +43,7 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 ### 25 Mar 2026
 - Improve average event processing time by ~4.6% by using smaller integer types. P50min: 34ns -> 33ns. P75min: 54ns -> 53ns. P95min: 73ns -> 67ns.
 - Simplify code in some places.
+- Fix bug where size type was not large enough to fit some massive orders. Unfortunately increases average event time by ~5.9%.
 
 ### 24 Mar 2026
 - Add benchmarking script.

@@ -1,0 +1,1 @@
+if we divide price by 100 then we can half its types size as well as slash the orderbook size
