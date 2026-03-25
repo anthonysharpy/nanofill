@@ -13,6 +13,7 @@ The system is designed with a number of low-latency techniques:
 - Performance-guided optimisation (PGO) build process, resulting in faster binaries.
 - Compiler flags set for aggressive optimisation. 
 - Highly aggressive inlining of small, often invoked and rarely repeated code, avoiding function call overhead.
+- Use of smallest possible data types to reduce cache turnover.
 
 The software comes complete with the ability to produce its own latency distribution performance metrics analysis:
 
