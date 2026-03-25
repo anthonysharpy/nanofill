@@ -33,7 +33,8 @@ PROFILE_COMPILE_FLAGS  = $(BASE_COMPILE_FLAGS) -g -fno-omit-frame-pointer -fprof
 PROFILE_LINK_FLAGS = $(BASE_LINK_FLAGS) -fprofile-use=pgodata
 PGO_COMPILE_FLAGS = $(BASE_COMPILE_FLAGS) -fprofile-generate=pgodata
 PGO_LINK_FLAGS = $(BASE_LINK_FLAGS) -fprofile-generate=pgodata
-DUMP_ASSEMBLY_COMPILE_FLAGS = $(RELEASE_COMPILE_FLAGS) -g
+DUMP_ASSEMBLY_COMPILE_FLAGS = $(BASE_COMPILE_FLAGS) -g
+DUMP_ASSEMBLY_LINK_FLAGS = $(BASE_LINK_FLAGS)
 BENCHMARK_COMPILE_FLAGS = $(BASE_COMPILE_FLAGS)
 BENCHMARK_LINK_FLAGS = $(BASE_LINK_FLAGS)
 
@@ -103,7 +104,6 @@ profile: pgo-gen
 # ==== Dump Assembly ==== #
 
 assembly: clean
-	$(MAKE) pgo-gen
 	$(MAKE) all COMPILE_FLAGS="$(DUMP_ASSEMBLY_COMPILE_FLAGS)" LINK_FLAGS="$(RELEASE_LINK_FLAGS)"
 	rm -f assembly.asm
 	objdump -d -M intel -C -l ./nanofill | sed 's|.*/src/||' >> assembly.asm
