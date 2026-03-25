@@ -43,10 +43,12 @@ process_events(const std::vector<Event>& events, TradingEngine& trading_engine, 
     std::thread event_producer_thread(nanofill::threads::event_producer<1024>, std::ref(buffer), std::ref(events));
     std::thread event_consumer_thread(
         nanofill::threads::event_consumer<1024>,
-        std::ref(buffer), std::ref(order_book),
+        std::ref(buffer),
+        std::ref(order_book),
         std::ref(trading_engine),
         std::ref(performance_data)
     );
+    
     event_producer_thread.join();
     event_consumer_thread.join();
     
