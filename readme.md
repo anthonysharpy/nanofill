@@ -39,6 +39,9 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 
 ## Recent Changes
 
+### 25 Mar 2026
+- Simplify code in some places.
+
 ### 24 Mar 2026
 - Add benchmarking script.
 
