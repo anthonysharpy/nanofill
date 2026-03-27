@@ -44,6 +44,7 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 - Only use P999 data for calculating average event processing time in order to reduce noise during benchmarking. 
 - Make buffer size a configurable value.
 - Reduce event processing time by ~2.5% by shrinking buffer size.
+- Reduce event processing time by ~1.6% by making event direction a larger type, preventing wasted CPU cycles on type widening.
 
 ### 25 Mar 2026
 - Improve average event processing time by ~4.6% by using smaller integer types. P50min: 34ns -> 33ns. P75min: 54ns -> 53ns. P95min: 73ns -> 67ns.

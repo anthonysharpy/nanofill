@@ -7,7 +7,7 @@
 
 namespace nanofill::events {
 
-enum class TradeDirection: std::int8_t {
+enum class TradeDirection: std::int32_t {
     Positive = 1,
     Negative = -1,
 };
