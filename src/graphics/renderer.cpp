@@ -17,7 +17,7 @@ void print_latency_percentiles(std::vector<std::vector<std::uint32_t>> performan
 
     float p0{}, p50{}, p75{}, p90{}, p95{}, p99{}, p999{}, p100{};
 
-    for (auto& run_data : performance_data) {
+    for (const auto& run_data : performance_data) {
         p0 += run_data[0];
         p50 += run_data[std::roundl(run_data.size() * 0.5)];
         p75 += run_data[std::roundl(run_data.size() * 0.75)];
@@ -50,35 +50,7 @@ void print_latency_percentiles(std::vector<std::vector<std::uint32_t>> performan
         << "P100: " << p100 << "ns\n\n";
 }
 
-void print_latency_distribution(std::vector<std::vector<std::uint32_t>> performance_data) {
-    // Flatten vectors into a single vector.
-    // Vectorを一つのvectorにまとめる。
-    std::vector<std::uint32_t> combined_data;
-    combined_data.reserve(performance_data.size() * performance_data[0].size());
-
-    for (auto& data : performance_data) {
-        combined_data.insert(
-            combined_data.end(),
-            std::make_move_iterator(data.begin()),
-            std::make_move_iterator(data.end())
-        );
-    }
-
-    // Sort.
-    // 並べ替える。
-    std::sort(combined_data.begin(), combined_data.end());
-
-    // Keep only p99.9 data.
-    // p99.9データしか要らない。
-    std::vector<std::uint32_t> p999_data;
-    p999_data.reserve(combined_data.size() * 0.999);
-
-    p999_data.insert(
-        p999_data.end(),
-        std::make_move_iterator(combined_data.begin()),
-        std::make_move_iterator(combined_data.end())
-    );
-
+void print_latency_distribution(std::vector<std::uint32_t> flattened_p999_data) {
     // The frequency table will go up in 10ns increments up to 200ns.
     // 度数表は200nsまで10ns刻みで増加する。
     constexpr int frequency_table_rows = 20;
@@ -87,7 +59,7 @@ void print_latency_distribution(std::vector<std::vector<std::uint32_t>> performa
 
     // Calculate the frequency table.
     // 度数表を計算する。
-    for (auto latency : p999_data) {
+    for (const auto& latency : flattened_p999_data) {
         unsigned int row = latency / frequency_table_increment_size;
 
         if (row >= frequency_table_rows) {
@@ -101,7 +73,7 @@ void print_latency_distribution(std::vector<std::vector<std::uint32_t>> performa
     // 一番度数が高い度数をチェックする。
     int highest_frequency = 0;
 
-    for (auto frequency : frequency_table) {
+    for (const auto& frequency : frequency_table) {
         if (frequency > highest_frequency) {
             highest_frequency = frequency;
         }
@@ -130,21 +102,57 @@ void print_latency_distribution(std::vector<std::vector<std::uint32_t>> performa
     }
 }
 
-void print_stats(std::vector<std::vector<std::uint32_t>> performance_data) {
+void print_stats(std::vector<std::uint32_t> flattened_p999_data) {
     std::uint64_t total = 0;
-    std::uint64_t event_count = 0;
-
-    for (auto& run: performance_data) {
-        for (auto& time : run) {
-            total += time;
-            ++event_count;
-        }
+        
+    for (const auto& time : flattened_p999_data) {
+        total += time;
     }
 
-    double average = static_cast<double>(total) / event_count;
+    double average = static_cast<double>(total) / flattened_p999_data.size();
 
     std::cout << "===== Stats =====\n"
         << "Average event time: " << average << "ns\n\n";
+}
+
+std::vector<std::uint32_t>
+get_flattened_performance_data(std::vector<std::vector<std::uint32_t>> raw_performance_data) {
+    // Flatten vectors into a single vector.
+    // Vectorを一つのvectorにまとめる。
+    std::vector<std::uint32_t> flattened_data;
+    flattened_data.reserve(raw_performance_data.size() * raw_performance_data[0].size());
+
+    for (auto& data : raw_performance_data) {
+        flattened_data.insert(
+            flattened_data.end(),
+            std::make_move_iterator(data.begin()),
+            std::make_move_iterator(data.end())
+        );
+    }
+
+    // Sort.
+    // 並べ替える。
+    std::sort(flattened_data.begin(), flattened_data.end());
+
+    return flattened_data;
+}
+
+std::vector<std::uint32_t>
+get_flattened_p999_performance_data(std::vector<std::uint32_t> raw_flattened_performance_data) {
+    // Keep only p99.9 data.
+    // p99.9データしか要らない。
+    std::vector<std::uint32_t> p999_data;
+    const int p999_count = raw_flattened_performance_data.size() * 0.999;
+
+    p999_data.reserve(p999_count);
+
+    p999_data.insert(
+        p999_data.end(),
+        std::make_move_iterator(raw_flattened_performance_data.begin()),
+        std::make_move_iterator(raw_flattened_performance_data.begin() + p999_count)
+    );
+
+    return p999_data;
 }
 
 // Using the latency performance data we collected, draw a nice chart in the console that
@@ -153,9 +161,12 @@ void print_stats(std::vector<std::vector<std::uint32_t>> performance_data) {
 void render_latency_chart(std::vector<std::vector<std::uint32_t>>& performance_data) {
     std::cout << "\n";
 
-    print_stats(performance_data);
+    auto flattened_data = get_flattened_performance_data(performance_data);
+    auto flattened_p999_data = get_flattened_p999_performance_data(flattened_data); 
+
+    print_stats(flattened_p999_data);
     print_latency_percentiles(performance_data);
-    print_latency_distribution(performance_data);
+    print_latency_distribution(flattened_p999_data);
 }
 
 }
