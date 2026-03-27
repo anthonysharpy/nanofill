@@ -38,11 +38,15 @@ std::vector<std::uint32_t>
 process_events(const std::vector<Event>& events, TradingEngine& trading_engine, OrderBook& order_book) {
     std::vector<std::uint32_t> performance_data;
     performance_data.resize(events.size());
-    SPSCRingBuffer<Event, 1024> buffer;
+    SPSCRingBuffer<Event, nanofill::consts::SPSC_BUFFER_SIZE> buffer;
     
-    std::thread event_producer_thread(nanofill::threads::event_producer<1024>, std::ref(buffer), std::ref(events));
+    std::thread event_producer_thread(
+        nanofill::threads::event_producer<nanofill::consts::SPSC_BUFFER_SIZE>,
+        std::ref(buffer),
+        std::ref(events)
+    );
     std::thread event_consumer_thread(
-        nanofill::threads::event_consumer<1024>,
+        nanofill::threads::event_consumer<nanofill::consts::SPSC_BUFFER_SIZE>,
         std::ref(buffer),
         std::ref(order_book),
         std::ref(trading_engine),
