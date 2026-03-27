@@ -39,7 +39,7 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 
 ## Recent Changes
 
-## 27 Mar 2026
+### 27 Mar 2026
 - Only use P999 data for calculating average event processing time in order to reduce noise during benchmarking. 
 - Make buffer size a configurable value.
 - Reduce event processing time by ~2.5% by shrinking buffer size.
