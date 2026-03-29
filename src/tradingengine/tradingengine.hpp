@@ -70,7 +70,6 @@ private:
         // A cancellation/deletion event will always contain the correct size, so we don't need
         // to look it up.
         // 削除のイベントなどはいつも正しいイベントのサイズを含められて、検索する必要がない。
-
         total_market_price -= event.size * event.price;
         market_shares -= event.size;
 
