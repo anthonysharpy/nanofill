@@ -15,6 +15,7 @@ class SPSCRingBuffer {
     // By enforcing this we don't have to do any integer division which is faster.
     // そうすると、整数除算が必要がなくなり、速くなる。
     static_assert(N > 0 && (N & (N - 1)) == 0, "N must be a power of 2");
+    static_assert(std::is_trivially_copyable<T>(), "Type must be trivially copyable");
 
     alignas(std::hardware_destructive_interference_size) std::atomic<size_t> head{0};
     alignas(std::hardware_destructive_interference_size) std::atomic<size_t> tail{0};
