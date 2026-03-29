@@ -6,7 +6,7 @@ The system is designed with a number of low-latency techniques:
 
 - Memory-aligned SPSC ring buffers for fast communication between event producer and consumer threads.
 - Single-threading to avoid caching and locking slowdowns.
-- Ordered and compact POD structs optimised for cache locality.
+- Ordered and compact POD structs optimised for cache locality and reducing CPU cycles.
 - Structs of arrays instead of arrays of structs to reduce cache turnover.
 - Pre-reserved memory pools to minimise allocations.
 - Avoidance of branches to avoid mispredictions, with optimised branch ordering where they must exist.
@@ -14,7 +14,7 @@ The system is designed with a number of low-latency techniques:
 - Compiler flags set for aggressive optimisation. 
 - Highly aggressive inlining of small, often invoked and rarely repeated code, avoiding function call overhead.
 
-The software comes complete with the ability to produce its own latency distribution performance metrics analysis:
+The software comes complete with the ability to produce its own latency distribution performance analysis:
 
 ![Software output](/media/output.png)
 
