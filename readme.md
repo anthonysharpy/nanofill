@@ -39,6 +39,9 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 
 ## Recent Changes
 
+### 29 Mar 2026
+- Record cache misses in profile data.
+
 ### 27 Mar 2026
 - Only use P999 data for calculating average event processing time in order to reduce noise during benchmarking. 
 - Make buffer size a configurable value.
