@@ -20,6 +20,8 @@ The software comes complete with the ability to produce its own latency distribu
 
 The purpose of this is to demonstrate the implementation of fast, low-latency programming techniques. It does not particularly show off any complex algorithms. For an example of complex mathematics and algorithms, see https://github.com/anthonysharpy/theta-surface.
 
+This program was optimised based on the provided data, namely, the ~670,000 market order events. The optimisation decisions made in this program do not necessarily reflect those that might be advisable in a real production system, where data and throughput would likely differ greatly.
+
 # Usage
 
 Note that the build process is designed to run on Linux and may require some extra software.
