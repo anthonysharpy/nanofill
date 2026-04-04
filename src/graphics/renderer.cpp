@@ -50,7 +50,7 @@ void print_latency_percentiles(std::vector<std::vector<std::uint32_t>> performan
         << "P100: " << p100 << "ns\n\n";
 }
 
-void print_latency_distribution(std::vector<std::uint32_t> flattened_p999_data) {
+void print_latency_distribution(const std::vector<std::uint32_t>& flattened_p999_data) {
     // The frequency table will go up in 10ns increments up to 200ns.
     // 度数表は200nsまで10ns刻みで増加する。
     constexpr int frequency_table_rows = 20;
@@ -102,7 +102,7 @@ void print_latency_distribution(std::vector<std::uint32_t> flattened_p999_data) 
     }
 }
 
-void print_stats(std::vector<std::uint32_t> flattened_p999_data) {
+void print_stats(const std::vector<std::uint32_t>& flattened_p999_data) {
     std::uint64_t total = 0;
         
     for (const auto& time : flattened_p999_data) {
