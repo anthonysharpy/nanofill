@@ -124,20 +124,8 @@ private:
         insert_order(event);
     }
 
-    // Same as remove_order, except slightly faster because we already know the order's index.
-    // remove_orderと同じだが、注文のインデックスがもう分かるので、もう少し速い。
-    [[gnu::always_inline]]
-    void remove_order_with_index(const Event event, const unsigned int index) noexcept {
-        levels_last_modified[event.price] = event.time;
-        levels_size[event.price] -= event.size;
-        levels_orders[event.price][index] = levels_orders[event.price].back();
-        levels_orders[event.price].pop_back();
-    }
-
-    // Remove an order from the order book. Prefer remove_order_with_index if possible.
-    // Returns true if an order was removed.
-    // 板から注文を削除する。できれば、remove_order_with_indexを使って。注文を削除できたら、trueを
-    // 返す。
+    // Remove an order from the order book. Returns true if an order was removed.
+    // 板から注文を削除する。注文を削除できたら、trueを返す。
     [[gnu::always_inline]]
     bool remove_order(const Event event) noexcept {
         auto entry = get_order_by_price_and_id(event.price, event.order_id);
