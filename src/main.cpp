@@ -35,7 +35,11 @@ std::vector<Event> parse_events(const std::vector<nanofill::consts::TradingDataC
 }
 
 std::vector<std::uint32_t>
-process_events(const std::vector<Event>& events, TradingEngine& trading_engine, OrderBook& order_book) {
+process_events(
+    const std::vector<Event>& events,
+    TradingEngine& trading_engine,
+    OrderBook& order_book
+) {
     std::vector<std::uint32_t> performance_data;
     performance_data.resize(events.size());
     SPSCRingBuffer<Event, nanofill::consts::SPSC_BUFFER_SIZE> buffer;
