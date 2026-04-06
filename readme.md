@@ -41,6 +41,9 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 
 ## Recent Changes
 
+### 6 Apr 2026
+- Add debugging code that prints the final capacities of the market data vectors. Tells us that 37 of the vectors are growing during execution whereas 499,963 are not.
+
 ### 29 Mar 2026
 - Record cache misses in profile data.
 

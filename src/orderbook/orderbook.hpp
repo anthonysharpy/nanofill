@@ -81,6 +81,10 @@ public:
     const std::vector<OrderBookEntry>& get_orders_for_price(const std::uint32_t price) const noexcept {
         return levels_orders[price];
     }
+
+    std::vector<std::vector<OrderBookEntry>>& get_levels_orders() {
+        return levels_orders;
+    }
     
 private:
     // Data for all order book levels. We'll store this in vectors instead of structs,
