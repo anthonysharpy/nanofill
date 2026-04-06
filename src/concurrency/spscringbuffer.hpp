@@ -19,7 +19,7 @@ class SPSCRingBuffer {
 
     alignas(std::hardware_destructive_interference_size) std::atomic<size_t> head{0};
     alignas(std::hardware_destructive_interference_size) std::atomic<size_t> tail{0};
-    std::array<T, N> buffer;
+    alignas(std::hardware_destructive_interference_size) std::array<T, N> buffer;
 
 public:
     // Returns true if successful.
