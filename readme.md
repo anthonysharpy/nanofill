@@ -4,12 +4,13 @@ NanoFill is a C++ low-latency market data orderbook and trading engine that reco
 
 The system is designed with a number of low-latency techniques:
 
-- Memory-aligned SPSC ring buffers for fast communication between event producer and consumer threads.
-- Orderbook logic is single-threaded to avoid caching and locking slowdowns.
-- Pre-reserved memory pools to minimise allocations.
+- Memory-aligned SPSC ring buffers for fast communication between threads.
+- Single-threaded orderbook logic to avoid caching and locking slowdowns.
+- Pre-reserved memory pools to minimise expensive initial allocations.
 - Custom memory pool allocator running on a separate thread, optimised for minimal thread contention. 
-- Ordered and compact POD structs optimised for cache locality and reducing CPU cycles.
+- Ordered and compact POD structs optimised for cache locality.
 - Selective use of structs of arrays optimised for SIMD instructions.
+- Carefully-chosen types small enough to fit into cache and big enough to avoid extra widening operations on the CPU.
 - Avoidance of branches to avoid mispredictions, with optimised branch ordering where they must exist.
 - Performance-guided optimisation (PGO) build process, resulting in faster binaries.
 - Compiler flags set for aggressive optimisation. 
