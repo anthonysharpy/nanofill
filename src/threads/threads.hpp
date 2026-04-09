@@ -18,6 +18,8 @@ using events::Event;
 // イベントバッファにイベントを入れる。
 template<size_t N>
 void event_producer(SPSCRingBuffer<Event, N>& event_buffer, const std::vector<Event>& events) noexcept {
+    concurrency::pin_thread_to_core(2);
+
     // It is much more efficient to push multiple events at once, however I've not done that as
     // it's sort-of cheating... in the real world, events come in one by one (usually). We also
     // don't want to wait for more events before pushing as that would introduce latency.
@@ -37,6 +39,8 @@ void event_consumer(
     TradingEngine& trading_engine,
     std::vector<std::uint32_t>& performance_data
 ) noexcept {
+    concurrency::pin_thread_to_core(0);
+
     std::uint32_t events_consumed = 0;
     Event events[8];
     std::uint8_t events_found = 0;

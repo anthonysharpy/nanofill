@@ -1,8 +1,12 @@
 #pragma once
 
 #include "events/event.hpp"
+#include "orderbookleveldatapool.hpp"
+#include "concurrency/concurrency.hpp"
 #include <climits>
 #include <cstdlib>
+#include <thread>
+#include <iostream>
 
 namespace nanofill::orderbook {
 
@@ -10,28 +14,6 @@ using events::Event;
 using events::EventType;
 
 constexpr std::size_t order_book_size = 500000;
-
-// A trading event.
-// 取引のイベント。
-struct OrderBookEntry {
-    // Dollar price times 10,000.
-    // 10,000倍したドルの価格。
-    std::uint32_t price;
-    // Seconds after midnight the event happened.
-    // イベントが発生したときからの零時から数秒。
-    std::uint32_t time;
-    std::uint32_t order_id;
-    // Number of shares. Negative means this is a sell order.
-    // 株の数。ネガチブなら、これは売り注文だ。
-    std::int32_t size;
-
-    OrderBookEntry(
-        std::uint32_t price,
-        std::uint32_t time,
-        std::uint32_t order_id,
-        std::int32_t size
-    ) noexcept : price{price}, time{time}, order_id{order_id}, size{size} {}
-};
 
 // Note that this order book only supports one stock index (in our data - Microsoft).
 // For an order book that supports multiple, the choices here would probably be a lot
@@ -41,7 +23,38 @@ struct OrderBookEntry {
 // の割り当ての制限を重視する）。
 class OrderBook {
 public:
-    OrderBook() noexcept;
+    OrderBook() noexcept {
+        levels_orders.resize(order_book_size);
+
+        // Each level will get two pools by default. This provides us an opportunity for later
+        // optimisations in the hot loop because all we have to do is check if .growth_requested
+        // is set to false.
+        //
+        // It's very important that THIS THREAD does initial_grow(), because otherwise the data belongs
+        // to the other thread, which increases latency as we have to request access and ownership to
+        // the data on the CPU.
+        for (auto& level : levels_orders) {
+            level.initial_grow();
+        }
+
+        levels_last_modified.resize(order_book_size);
+        levels_size.resize(order_book_size);
+
+        memory_allocator_thread = std::jthread([](std::stop_token stop){
+            concurrency::pin_thread_to_core(1);
+
+            orderbook::OrderBookLevelDataPool* data[GROWTH_BUFFER_SIZE];
+            std::uint32_t n;
+
+            while (!stop.stop_requested()) {
+                auto count = orderbook::growth_buffer.pop_many(data, GROWTH_BUFFER_SIZE);
+
+                for (n = 0; n < count; n++) {
+                    data[n]->grow();
+                }
+            }
+        });
+    }
 
     // Returns true if the event was actioned, false if not.
     // 処理したら、trueを返す。または、false。
@@ -77,14 +90,11 @@ public:
         return levels_size[price];
     }
 
-    [[gnu::always_inline]]
-    const std::vector<OrderBookEntry>& get_orders_for_price(const std::uint32_t price) const noexcept {
-        return levels_orders[price];
-    }
-
-    std::vector<std::vector<OrderBookEntry>>& get_levels_orders() {
-        return levels_orders;
-    }
+    //[[gnu::always_inline]]
+    // const std::array<OrderBookEntry, consts::ORDER_BOOK_LEVEL_DATA_POOL_SIZE>&
+    // get_orders_for_price(const std::uint32_t price) const noexcept {
+    //     return levels_orders[price].data;
+    // }
     
 private:
     // Data for all order book levels. We'll store this in vectors instead of structs,
@@ -101,7 +111,9 @@ private:
     std::vector<std::uint32_t> levels_size;
     // The orders on each level.
     // 各レベルの注文。
-    std::vector<std::vector<OrderBookEntry>> levels_orders;
+    std::vector<OrderBookLevelDataPool> levels_orders;
+
+    std::jthread memory_allocator_thread;
 
     // An order has been entirely deleted.
     // 注文が完全に削除された。
@@ -128,32 +140,17 @@ private:
     // 板から注文を削除する。注文を削除できたら、trueを返す。
     [[gnu::always_inline]]
     bool remove_order(const Event event) noexcept {
-        auto entry = get_order_by_price_and_id(event.price, event.order_id);
+        auto size = levels_orders[event.price].remove_order_by_id(event.order_id);
         
-        if (entry == nullptr) {
+        if (size == std::numeric_limits<decltype(size)>::max()) {
             // Order not found.
             return false;
         }
 
         levels_last_modified[event.price] = event.time;
-        levels_size[event.price] -= std::abs(entry->size);
-        *entry = levels_orders[event.price].back();
-        levels_orders[event.price].pop_back();
+        levels_size[event.price] -= size;
 
         return true;
-    }
-
-    // Get a pointer to the order with the given price and id, or nullptr if it doesn't exist.
-    // この価格とIDがある注文のポインタを返す。ないと、nullptrを返す。
-    [[gnu::always_inline]]
-    OrderBookEntry* get_order_by_price_and_id(const std::uint32_t price, const std::uint32_t order_id) noexcept {
-        for (auto& order : levels_orders[price]) {
-            if (order.order_id == order_id) {
-                return &order;
-            }
-        }
-
-        return nullptr;
     }
 
     // An order has had its quantity decreased by the given amount (partial cancellation).
@@ -162,14 +159,14 @@ private:
     // 処理したら、trueを返す。
     [[gnu::always_inline]]
     bool process_cancellation_event(const Event event) noexcept {
-        OrderBookEntry* current_event = get_order_by_price_and_id(event.price, event.order_id);
+        auto size_ptr = levels_orders[event.price].get_event_size_by_order_id(event.order_id);
 
-        if (current_event == nullptr) {
+        if (size_ptr == nullptr) {
             return false;
         }
 
         levels_size[event.price] -= event.size;
-        current_event->size -= event.get_size_with_direction();
+        *size_ptr -= event.get_size_with_direction();
         levels_last_modified[event.price] = event.time;
 
         return true;
@@ -182,12 +179,7 @@ private:
         levels_last_modified[event.price] = event.time;
         levels_size[event.price] += event.size;
 
-        levels_orders[event.price].emplace_back(
-            event.price,
-            event.time,
-            event.order_id,
-            event.get_size_with_direction()
-        );
+        levels_orders[event.price].push(event);
     }
 };
 

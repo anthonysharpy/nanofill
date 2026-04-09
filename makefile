@@ -98,7 +98,7 @@ pgo-gen: clean
 
 profile: pgo-gen
 	$(MAKE) all COMPILE_FLAGS="$(PROFILE_COMPILE_FLAGS)" LINK_FLAGS="$(PROFILE_LINK_FLAGS)"
-	sudo perf record -e cycles,cache-references,LLC-load-misses -F 16000 -g -- ./$(BINARY_NAME) --benchmark
+	sudo perf record -e cycles,cache-references,LLC-load-misses --sample-cpu -F 16000 -g -- ./$(BINARY_NAME) --benchmark
 	sudo hotspot perf.data
 
 # ==== Dump Assembly ==== #

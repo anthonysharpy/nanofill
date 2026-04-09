@@ -7,6 +7,7 @@
 #include "threads/threads.hpp"
 #include "graphics/renderer.hpp"
 #include "consts/consts.hpp"
+#include "concurrency/concurrency.hpp"
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -74,6 +75,8 @@ bool is_benchmark_mode(int argc, char* argv[]) {
 }
 
 int main(int argc, char* argv[]) {
+    nanofill::concurrency::pin_thread_to_core(0);
+
     std::cout << "Initialising..." << std::endl;
     initialise();
 
