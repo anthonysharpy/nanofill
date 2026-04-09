@@ -5,10 +5,11 @@ NanoFill is a C++ low-latency market data orderbook and trading engine that reco
 The system is designed with a number of low-latency techniques:
 
 - Memory-aligned SPSC ring buffers for fast communication between event producer and consumer threads.
-- Single-threading to avoid caching and locking slowdowns.
-- Ordered and compact POD structs optimised for cache locality and reducing CPU cycles.
-- Structs of arrays instead of arrays of structs to reduce cache turnover.
+- Orderbook logic is single-threaded to avoid caching and locking slowdowns.
 - Pre-reserved memory pools to minimise allocations.
+- Custom memory pool allocator running on a separate thread, optimised for minimal thread contention. 
+- Ordered and compact POD structs optimised for cache locality and reducing CPU cycles.
+- Selective use of structs of arrays optimised for SIMD instructions.
 - Avoidance of branches to avoid mispredictions, with optimised branch ordering where they must exist.
 - Performance-guided optimisation (PGO) build process, resulting in faster binaries.
 - Compiler flags set for aggressive optimisation. 
@@ -40,6 +41,22 @@ Once built, simply run the executable.
 Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 
 ## Recent Changes
+
+### 9 April 2026
+- Add a custom pool allocator instead of relying on vector growth.
+
+    Previously, orders for each price were stored in a vector of default capacity 100.
+
+    Now, each price has a pool. A pool can hold 48 orders. Extra pools can be created (every price starts with two pools by default to roughly match the previous size of 100). Each pool points to the next one in a linked-list fashion. When a pool is full, the main thread puts a pointer to the pool into an SPSC ring buffer. A separate thread processes this and allocates a new pool. It then simply updates the `next` pointer in the pool to point to the new pool, thus almost completely avoiding thread contention.
+
+    The result is that P50 becomes ~3ns (~7.2%) slower, but P75 to P99 becomes ~4-5% faster. P99.9 becomes ~13ns (~11.7%) slower. However, P100 becomes ~34% (15,505ns) faster. The average event time decreases by 2.41%.
+
+    Overall this is a very successful change. Technically the extra complexity adds some delay, and the vector approach worked reasonably given the current data, but vectors would not have scaled well at higher order counts, as growing a vector usually involves doubling its size. Previous tests showed that we were only growing vectors 0.0074% of the time. In other words, the vectors were never really put to the test, and likely would have failed under real-world conditions. These dynamically allocated pools on the other hand can be grown and pruned on-demand virtually for free.
+- Add core pinning to make sure that important cache does not get spread across cores.
+- Do all initialisation on the main thread so that the cache is warm on that core.
+- Store order_ids as a separate array. This lets us perform SIMD to check up to 8 order_ids at once when searching for an order. Store other data as a struct in a separate array; having separate arrays for each data point results in too many cache misses.
+- Keep a pointer to the next non-full pool in the first pool for faster insertion. When we remove an order from a pool, if that pool is younger, set the pointer to that pool.
+- Update profiling recipe to record activity from all CPU cores.
 
 ### 6 Apr 2026
 - Add debugging code that prints the final capacities of the market data vectors. Tells us that 37 of the vectors are growing during (exceeding capacity 100) execution whereas 499,963 are not.
