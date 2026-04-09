@@ -14,6 +14,7 @@
 #include <chrono>
 
 namespace nanofill::orderbook {
+    
     using events::Event;
 
     constexpr std::size_t POOL_SIZE = 48;
@@ -23,12 +24,28 @@ namespace nanofill::orderbook {
 
     alignas (std::hardware_destructive_interference_size) static concurrency::SPSCRingBuffer<OrderBookLevelDataPool*, GROWTH_BUFFER_SIZE> growth_buffer;
 
+    struct LevelPoolData
+    {
+        std::uint32_t price;
+        std::uint32_t time;
+        std::int32_t size;
+
+        LevelPoolData(
+            std::uint32_t price,
+            std::uint32_t time,
+            std::int32_t size
+        ) : price(price), time(time), size(size) {}
+
+        LevelPoolData() = default;
+    };
+
     struct OrderBookLevelDataPool
     {
-        std::array<std::uint32_t, POOL_SIZE> prices;
-        std::array<std::uint32_t, POOL_SIZE> times;
+        // Combine other data into an array of structs so that we can update all data without
+        // having to touch multiple different cache lines.
+        std::array<LevelPoolData, POOL_SIZE> data;
+        // Order IDs gets their own contiguous array so we can easily run SIMD over it.
         std::array<std::uint32_t, POOL_SIZE> order_ids;
-        std::array<std::int32_t, POOL_SIZE> sizes;
         alignas (std::hardware_destructive_interference_size) std::unique_ptr<OrderBookLevelDataPool> next = nullptr;
         OrderBookLevelDataPool* next_pool_available_for_insert = this;
         std::uint64_t created_at = std::chrono::steady_clock::now().time_since_epoch().count();
@@ -44,12 +61,10 @@ namespace nanofill::orderbook {
                 auto index = pool->find_order_id_in_pool(order_id);
 
                 if (index < pool->size) {
-                    auto size = pool->sizes[index];
+                    auto size = pool->data[index].size;
 
-                    pool->prices[index] = pool->prices[pool->size-1];
-                    pool->times[index] = pool->times[pool->size-1];
+                    pool->data[index] = pool->data[pool->size-1];
                     pool->order_ids[index] = pool->order_ids[pool->size-1];
-                    pool->sizes[index] = pool->sizes[pool->size-1];
                     
                     --pool->size;
 
@@ -81,7 +96,7 @@ namespace nanofill::orderbook {
                 auto index = pool->find_order_id_in_pool(order_id);
 
                 if (index < pool->size) {
-                    return &pool->sizes[index];
+                    return &pool->data[index].size;
                 }
 
                 // Keep searching if we can.
@@ -97,10 +112,10 @@ namespace nanofill::orderbook {
 
         [[gnu::always_inline]]
         void push(const Event event) noexcept {
-            next_pool_available_for_insert->prices[next_pool_available_for_insert->size] = event.price;
-            next_pool_available_for_insert->times[next_pool_available_for_insert->size] = event.time;
-            next_pool_available_for_insert->order_ids[next_pool_available_for_insert->size] = event.order_id;
-            next_pool_available_for_insert->sizes[next_pool_available_for_insert->size] = event.get_size_with_direction();
+            next_pool_available_for_insert->data[next_pool_available_for_insert->size] =
+                LevelPoolData(event.price, event.time, event.size);
+            next_pool_available_for_insert->order_ids[next_pool_available_for_insert->size] =
+                event.order_id;
 
             ++next_pool_available_for_insert->size;
 
