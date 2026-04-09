@@ -55,7 +55,7 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
     Overall this is a very successful change. Technically the extra complexity adds some delay, and the vector approach worked reasonably given the current data, but vectors would not have scaled well at higher order counts, as growing a vector usually involves doubling its size. Previous tests showed that we were only growing vectors 0.0074% of the time. In other words, the vectors were never really put to the test, and likely would have failed under real-world conditions. These dynamically allocated pools on the other hand can be grown and pruned on-demand virtually for free.
 - Add core pinning to make sure that important cache does not get spread across cores.
 - Do all initialisation on the main thread so that the cache is warm on that core.
-- Store order_ids as a separate array. This lets us perform SIMD to check up to 8 order_ids at once when searching for an order. Store other data as a struct in a separate array; having separate arrays for each data point results in too many cache misses.
+- Store order IDs as a separate array in the orderbook. This lets us perform SIMD to check up to 8 order IDs at once when searching for an order. Store other data as a struct in a separate array; having separate arrays for each data point stresses the cache out too much.
 - Keep a pointer to the next non-full pool in the first pool for faster insertion. When we remove an order from a pool, if that pool is younger, set the pointer to that pool.
 - Update profiling recipe to record activity from all CPU cores.
 
