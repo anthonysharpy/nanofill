@@ -22,7 +22,7 @@ namespace nanofill::orderbook {
 
     struct OrderBookLevelDataPool;
 
-    alignas (std::hardware_destructive_interference_size) static concurrency::SPSCRingBuffer<OrderBookLevelDataPool*, GROWTH_BUFFER_SIZE> growth_buffer;
+    alignas (std::hardware_destructive_interference_size) inline concurrency::SPSCRingBuffer<OrderBookLevelDataPool*, GROWTH_BUFFER_SIZE> growth_buffer;
 
     struct LevelPoolData
     {
