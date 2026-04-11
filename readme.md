@@ -43,7 +43,7 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 
 ## Recent Changes
 
-### 9 April 2026
+### 11 April 2026
 - Add a custom pool allocator instead of relying on vector growth.
 
     Previously, orders for each price were stored in a vector of default capacity 100.
