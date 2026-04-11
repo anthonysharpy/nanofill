@@ -6,7 +6,6 @@
 #include <climits>
 #include <cstdlib>
 #include <thread>
-#include <iostream>
 
 namespace nanofill::orderbook {
 
@@ -30,9 +29,8 @@ public:
         // optimisations in the hot loop because all we have to do is check if .growth_requested
         // is set to false.
         //
-        // It's very important that THIS THREAD does initial_grow(), because otherwise the data belongs
-        // to the other thread, which increases latency as we have to request access and ownership to
-        // the data on the CPU.
+        // As an optimisation, we'll get this main thread to do initial_grow(), so that the cache
+        // is warm on this core.
         for (auto& level : levels_orders) {
             level.initial_grow();
         }
@@ -44,12 +42,11 @@ public:
             concurrency::pin_thread_to_core(1);
 
             orderbook::OrderBookLevelDataPool* data[GROWTH_BUFFER_SIZE];
-            std::uint32_t n;
 
             while (!stop.stop_requested()) {
                 auto count = orderbook::growth_buffer.pop_many(data, GROWTH_BUFFER_SIZE);
 
-                for (n = 0; n < count; n++) {
+                for (std::size_t n = 0; n < count; n++) {
                     data[n]->grow();
                 }
             }
