@@ -2,10 +2,10 @@ if we divide price by 100 then we can half its types size as well as slash the o
 
 size_t -> std::size_t
 
-.next might be null
-
 add --sample_cpu to other projects
+
 use std::size_t for array indexes if it makes it faster
+
 graph axis is kind of wrong - should start at 0?
 
 core pinning is wrong in netbook - 0+1 are not adjecent lcores. 0,4 etc are. need to make clear in
@@ -18,3 +18,5 @@ add needs main thread attention flag to pool -> pool will check then check what 
 it will either grow, prefetch a just-growed thing
 
 do we create too much on the stack?
+
+spawning pools stress test
