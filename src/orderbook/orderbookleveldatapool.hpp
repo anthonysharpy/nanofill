@@ -120,9 +120,46 @@ namespace nanofill::orderbook {
         }
 
         [[gnu::always_inline]]
+        LevelPoolData* get_order_data_by_order_id(const std::uint32_t order_id) noexcept {
+            OrderBookLevelDataPool* pool = this;
+
+            while (true) {
+                auto index = pool->find_order_id_in_pool(order_id);
+
+                if (index < pool->size) {
+                    return &pool->data[index];
+                }
+
+                // Keep searching if we can.
+                // できれば、探しつづける。
+                if (pool->next) {
+                    pool = pool->next.get();
+                    continue;
+                }
+
+                // The order doesn't exist.
+                // 注文は存在しない。
+                return nullptr;
+            }
+        }
+
+        [[gnu::always_inline]]
+        std::size_t get_order_count() noexcept {
+            OrderBookLevelDataPool* pool = this;
+            std::size_t count = pool->size;
+
+            while (pool->next) {
+                pool = pool->next.get();
+                count += pool->size;
+            }
+
+            return count;
+        }
+
+        [[gnu::always_inline]]
         void push(const Event event) noexcept {
             next_pool_available_for_insert->data[next_pool_available_for_insert->size] =
-                LevelPoolData(event.price, event.time, event.size);
+                LevelPoolData(event.price, event.time, event.get_size_with_direction());
             next_pool_available_for_insert->order_ids[next_pool_available_for_insert->size] =
                 event.order_id;
 

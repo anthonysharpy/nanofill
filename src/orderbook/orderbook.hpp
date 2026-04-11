@@ -91,11 +91,18 @@ public:
         return levels_size[price];
     }
 
-    //[[gnu::always_inline]]
-    // const std::array<OrderBookEntry, consts::ORDER_BOOK_LEVEL_DATA_POOL_SIZE>&
-    // get_orders_for_price(const std::uint32_t price) const noexcept {
-    //     return levels_orders[price].data;
-    // }
+    [[gnu::always_inline]]
+    std::size_t get_order_count_for_price(const std::uint32_t price) noexcept {
+        return levels_orders[price].get_order_count();
+    }
+
+    [[gnu::always_inline]]
+    LevelPoolData* get_order_by_id_and_price(
+        const std::uint32_t order_id,
+        const std::uint32_t price
+    ) noexcept {
+        return levels_orders[price].get_order_data_by_order_id(order_id);
+    }
     
 private:
     // Data for all order book levels. We'll store this in vectors instead of structs,

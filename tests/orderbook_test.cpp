@@ -20,7 +20,7 @@ TEST(OrderBook, ProcessSubmissionEvent) {
     };
 
     ASSERT_EQ(0U, orderbook.get_last_modified_for_price(10));
-    ASSERT_EQ(0U, orderbook.get_orders_for_price(10).size());
+    ASSERT_EQ(0U, orderbook.get_order_count_for_price(10));
     ASSERT_EQ(0U, orderbook.get_total_order_size_for_price(10));
 
     ASSERT_TRUE(orderbook.process_event(event));
@@ -28,13 +28,12 @@ TEST(OrderBook, ProcessSubmissionEvent) {
     ASSERT_EQ(100U, orderbook.get_last_modified_for_price(10));
     ASSERT_EQ(10U, orderbook.get_total_order_size_for_price(10));
 
-    auto orders = orderbook.get_orders_for_price(10);
+    auto order = orderbook.get_order_by_id_and_price(1000, 10);
 
-    ASSERT_EQ(1U, orders.size());
-    ASSERT_EQ(orders[0].order_id, 1000U);
-    ASSERT_EQ(orders[0].price, 10U);
-    ASSERT_EQ(orders[0].size, 10);
-    ASSERT_EQ(orders[0].time, 100U);
+    ASSERT_EQ(orderbook.get_order_count_for_price(10), 1U);
+    ASSERT_EQ(order->price, 10U);
+    ASSERT_EQ(order->size, 10);
+    ASSERT_EQ(order->time, 100U);
 
     Event event2 {
         .price = 10,
@@ -50,17 +49,16 @@ TEST(OrderBook, ProcessSubmissionEvent) {
     ASSERT_EQ(105U, orderbook.get_last_modified_for_price(10));
     ASSERT_EQ(20U, orderbook.get_total_order_size_for_price(10));
 
-    orders = orderbook.get_orders_for_price(10);
+    auto order1 = orderbook.get_order_by_id_and_price(1000, 10);
+    auto order2 = orderbook.get_order_by_id_and_price(1001, 10);
 
-    ASSERT_EQ(2U, orders.size());
-    ASSERT_EQ(orders[0].order_id, 1000U);
-    ASSERT_EQ(orders[0].price, 10U);
-    ASSERT_EQ(orders[0].size, 10);
-    ASSERT_EQ(orders[0].time, 100U);
-    ASSERT_EQ(orders[1].order_id, 1001U);
-    ASSERT_EQ(orders[1].price, 10U);
-    ASSERT_EQ(orders[1].size, -10);
-    ASSERT_EQ(orders[1].time, 105U);
+    ASSERT_EQ(2U, orderbook.get_order_count_for_price(10));
+    ASSERT_EQ(order1->price, 10U);
+    ASSERT_EQ(order1->size, 10);
+    ASSERT_EQ(order1->time, 100U);
+    ASSERT_EQ(order2->price, 10U);
+    ASSERT_EQ(order2->size, -10);
+    ASSERT_EQ(order2->time, 105U);
 }
 
 TEST(OrderBook, ProcessBigSubmissionEvent) {
@@ -79,13 +77,12 @@ TEST(OrderBook, ProcessBigSubmissionEvent) {
 
     ASSERT_EQ(200000U, orderbook.get_total_order_size_for_price(10));
 
-    auto orders = orderbook.get_orders_for_price(10);
+    auto order = orderbook.get_order_by_id_and_price(1000, 10);
 
-    ASSERT_EQ(1U, orders.size());
-    ASSERT_EQ(orders[0].order_id, 1000U);
-    ASSERT_EQ(orders[0].price, 10U);
-    ASSERT_EQ(orders[0].size, 200000);
-    ASSERT_EQ(orders[0].time, 100U);
+    ASSERT_EQ(1U, orderbook.get_order_count_for_price(10));
+    ASSERT_EQ(order->price, 10U);
+    ASSERT_EQ(order->size, 200000);
+    ASSERT_EQ(order->time, 100U);
 
     Event event2 {
         .price = 10,
@@ -101,17 +98,16 @@ TEST(OrderBook, ProcessBigSubmissionEvent) {
     ASSERT_EQ(105U, orderbook.get_last_modified_for_price(10));
     ASSERT_EQ(400000U, orderbook.get_total_order_size_for_price(10));
 
-    orders = orderbook.get_orders_for_price(10);
+    auto order1 = orderbook.get_order_by_id_and_price(1000, 10);
+    auto order2 = orderbook.get_order_by_id_and_price(1001, 10);
 
-    ASSERT_EQ(2U, orders.size());
-    ASSERT_EQ(orders[0].order_id, 1000U);
-    ASSERT_EQ(orders[0].price, 10U);
-    ASSERT_EQ(orders[0].size, 200000);
-    ASSERT_EQ(orders[0].time, 100U);
-    ASSERT_EQ(orders[1].order_id, 1001U);
-    ASSERT_EQ(orders[1].price, 10U);
-    ASSERT_EQ(orders[1].size, -200000);
-    ASSERT_EQ(orders[1].time, 105U);
+    ASSERT_EQ(2U, orderbook.get_order_count_for_price(10));
+    ASSERT_EQ(order1->price, 10U);
+    ASSERT_EQ(order1->size, 200000);
+    ASSERT_EQ(order1->time, 100U);
+    ASSERT_EQ(order2->price, 10U);
+    ASSERT_EQ(order2->size, -200000);
+    ASSERT_EQ(order2->time, 105U);
 }
 
 TEST(OrderBook, ProcessCancellationEvent) {
@@ -144,13 +140,12 @@ TEST(OrderBook, ProcessCancellationEvent) {
     ASSERT_EQ(orderbook.get_last_modified_for_price(10), 105U);
     ASSERT_EQ(orderbook.get_total_order_size_for_price(10), 7U);
 
-    auto orders = orderbook.get_orders_for_price(10);
+    auto order = orderbook.get_order_by_id_and_price(1000, 10);
 
-    ASSERT_EQ(orders.size(), 1U);
-    ASSERT_EQ(orders[0].order_id, 1000U);
-    ASSERT_EQ(orders[0].price, 10U);
-    ASSERT_EQ(orders[0].size, 7);
-    ASSERT_EQ(orders[0].time, 100U);
+    ASSERT_EQ(orderbook.get_order_count_for_price(10), 1U);
+    ASSERT_EQ(order->price, 10U);
+    ASSERT_EQ(order->size, 7);
+    ASSERT_EQ(order->time, 100U);
 }
 
 TEST(OrderBook, ProcessCancellationEventChangesEventSizeCorrectly) {
@@ -167,11 +162,11 @@ TEST(OrderBook, ProcessCancellationEventChangesEventSizeCorrectly) {
 
     ASSERT_TRUE(orderbook.process_event(submission_event));
 
-    auto entries = orderbook.get_orders_for_price(10);
+    auto order = orderbook.get_order_by_id_and_price(1000, 10);
 
-    ASSERT_EQ(entries[0].size, 10);
+    ASSERT_EQ(order->size, 10);
 
-        Event cancellation_event {
+    Event cancellation_event {
         .price = 10,
         .time = 105,
         .order_id = 1000,
@@ -182,9 +177,9 @@ TEST(OrderBook, ProcessCancellationEventChangesEventSizeCorrectly) {
 
     ASSERT_TRUE(orderbook.process_event(cancellation_event));
 
-    entries = orderbook.get_orders_for_price(10);
+    order = orderbook.get_order_by_id_and_price(1000, 10);
 
-    ASSERT_EQ(entries[0].size, 7);
+    ASSERT_EQ(order->size, 7);
 
     // Sell event, make sure it's handled correctly.
     Event submission_event2 {
@@ -198,9 +193,9 @@ TEST(OrderBook, ProcessCancellationEventChangesEventSizeCorrectly) {
 
     ASSERT_TRUE(orderbook.process_event(submission_event2));
 
-    entries = orderbook.get_orders_for_price(10);
+    order = orderbook.get_order_by_id_and_price(1001, 10);
 
-    ASSERT_EQ(entries[1].size, -10);
+    ASSERT_EQ(order->size, -10);
 
     Event cancellation_event2 {
         .price = 10,
@@ -213,9 +208,9 @@ TEST(OrderBook, ProcessCancellationEventChangesEventSizeCorrectly) {
 
     ASSERT_TRUE(orderbook.process_event(cancellation_event2));
 
-    entries = orderbook.get_orders_for_price(10);
+    order = orderbook.get_order_by_id_and_price(1001, 10);
 
-    ASSERT_EQ(entries[1].size, -7);
+    ASSERT_EQ(order->size, -7);
 }
 
 TEST(OrderBook, ProcessVisibleExecutionEvent) {
@@ -248,9 +243,7 @@ TEST(OrderBook, ProcessVisibleExecutionEvent) {
     ASSERT_EQ(orderbook.get_last_modified_for_price(10), 105U);
     ASSERT_EQ(orderbook.get_total_order_size_for_price(10), 0U);
 
-    auto orders = orderbook.get_orders_for_price(10);
-
-    ASSERT_EQ(orders.size(), 0U);
+    ASSERT_EQ(orderbook.get_order_count_for_price(10), 0U);
 }
 
 TEST(OrderBook, ProcessDeletionEvent) {
@@ -283,7 +276,5 @@ TEST(OrderBook, ProcessDeletionEvent) {
     ASSERT_EQ(orderbook.get_last_modified_for_price(10), 105U);
     ASSERT_EQ(orderbook.get_total_order_size_for_price(10), 0U);
 
-    auto orders = orderbook.get_orders_for_price(10);
-
-    ASSERT_EQ(orders.size(), 0U);
+    ASSERT_EQ(orderbook.get_order_count_for_price(10), 0U);
 }
