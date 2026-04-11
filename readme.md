@@ -8,6 +8,7 @@ The system is designed with a number of low-latency techniques:
 - Single-threaded orderbook logic to avoid caching and locking slowdowns.
 - Pre-reserved memory pools to minimise expensive initial allocations.
 - Custom memory pool allocator running on a separate thread, optimised for minimal thread contention. 
+- Core-pinning to avoid unnecessary sharing of cache.
 - Ordered and compact POD structs optimised for cache locality.
 - Selective use of structs of arrays optimised for SIMD instructions.
 - Carefully-chosen types small enough to fit into cache and big enough to avoid extra widening operations on the CPU.
