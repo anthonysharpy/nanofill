@@ -7,6 +7,7 @@
 namespace nanofill::concurrency {
 
 // Pins the current thread to the given core ID.
+// 現在のスレッドを指定されたコアに固定する。
 void pin_thread_to_core(int core_id) {
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);

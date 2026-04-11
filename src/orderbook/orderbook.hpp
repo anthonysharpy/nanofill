@@ -31,6 +31,10 @@ public:
         //
         // As an optimisation, we'll get this main thread to do initial_grow(), so that the cache
         // is warm on this core.
+        // 各レベルはデフォルトで２つのプールをもらう。そうすると、後でホットループで、.growth_requestedがfalse
+        // かどうかをチェックするだけで、最適化の機会になる。
+        //
+        // 最適化として、このメインスレッドでキャッシュが温まるために、このスレッドにinitial_grow()を呼び出させる。
         for (auto& level : levels_orders) {
             level.initial_grow();
         }
