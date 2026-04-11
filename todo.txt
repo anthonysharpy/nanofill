@@ -1,3 +1,20 @@
 if we divide price by 100 then we can half its types size as well as slash the orderbook size
 
 size_t -> std::size_t
+
+.next might be null
+
+add --sample_cpu to other projects
+use std::size_t for array indexes if it makes it faster
+graph axis is kind of wrong - should start at 0?
+
+core pinning is wrong in netbook - 0+1 are not adjecent lcores. 0,4 etc are. need to make clear in
+that project's readme that it assumes you have an 8lcore processor. or, we can figure it out
+dynamically or something idk.
+
+when we take ownership of a new pool, we should ask the CPU to load it into cache. maybe
+
+add needs main thread attention flag to pool -> pool will check then check what it needs to do
+it will either grow, prefetch a just-growed thing
+
+do we create too much on the stack?
