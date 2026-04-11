@@ -50,7 +50,7 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 
     Now, each price has a pool. A pool can hold 48 orders. Extra pools can be created (every price starts with two pools by default to roughly match the previous size of 100). Each pool points to the next one in a linked-list fashion. When another pool is required, the main thread puts a pointer to the pool into an SPSC ring buffer. A separate thread processes this and allocates a new pool. It then simply updates the `next` pointer in the pool to point to the new pool, thus almost completely avoiding thread contention.
 
-    The result is that P50 becomes ~3ns (~7.2%) slower, but P75 to P99 becomes ~4-5% faster. P99.9 becomes ~13ns (~11.7%) slower. However, P100 becomes ~34% (15,505ns) faster. The average event time decreases by 2.41%.
+    The result is that P50 becomes ~3ns (~7%) slower, but P75 to P99 becomes ~4-5% faster. P99.9 becomes ~13ns (~11%) slower. However, P100 becomes ~40% (19,930ns) faster. The average event time decreases by 2.34%.
 
     Overall this is a very successful change. Technically the extra complexity adds some delay, and the vector approach worked reasonably given the current data, but vectors would not have scaled well at higher order counts, as growing a vector usually involves doubling its size. Previous tests showed that we were only growing vectors 0.0074% of the time. In other words, the vectors were never really put to the test, and likely would have failed under real-world conditions. These dynamically allocated pools on the other hand can be grown and pruned on-demand virtually for free.
 - Add core pinning to make sure that important cache does not get spread across cores.
