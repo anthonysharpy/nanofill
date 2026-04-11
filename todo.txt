@@ -13,3 +13,6 @@ that project's readme that it assumes you have an 8lcore processor. or, we can f
 dynamically or something idk.
 
 when we take ownership of a new pool, we should ask the CPU to load it into cache. maybe
+
+add needs main thread attention flag to pool -> pool will check then check what it needs to do
+it will either grow, prefetch a just-growed thing

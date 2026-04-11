@@ -48,7 +48,7 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 
     Previously, orders for each price were stored in a vector of default capacity 100.
 
-    Now, each price has a pool. A pool can hold 48 orders. Extra pools can be created (every price starts with two pools by default to roughly match the previous size of 100). Each pool points to the next one in a linked-list fashion. When a pool is full, the main thread puts a pointer to the pool into an SPSC ring buffer. A separate thread processes this and allocates a new pool. It then simply updates the `next` pointer in the pool to point to the new pool, thus almost completely avoiding thread contention.
+    Now, each price has a pool. A pool can hold 48 orders. Extra pools can be created (every price starts with two pools by default to roughly match the previous size of 100). Each pool points to the next one in a linked-list fashion. When another pool is required, the main thread puts a pointer to the pool into an SPSC ring buffer. A separate thread processes this and allocates a new pool. It then simply updates the `next` pointer in the pool to point to the new pool, thus almost completely avoiding thread contention.
 
     The result is that P50 becomes ~3ns (~7.2%) slower, but P75 to P99 becomes ~4-5% faster. P99.9 becomes ~13ns (~11.7%) slower. However, P100 becomes ~34% (15,505ns) faster. The average event time decreases by 2.41%.
 
