@@ -16,7 +16,7 @@ using events::Event;
 
 // Pushes events into the event buffer.
 // イベントバッファにイベントを入れる。
-template<size_t N>
+template<std::size_t N>
 void event_producer(SPSCRingBuffer<Event, N>& event_buffer, const std::vector<Event>& events) noexcept {
     concurrency::pin_thread_to_core(2);
 
@@ -32,7 +32,7 @@ void event_producer(SPSCRingBuffer<Event, N>& event_buffer, const std::vector<Ev
 
 // Reads and processes events from the event buffer.
 // イベントバッファからのイベントを読み取って、処理する。
-template<size_t N>
+template<std::size_t N>
 void event_consumer(
     SPSCRingBuffer<Event, N>& event_buffer,
     OrderBook& order_book,
