@@ -44,6 +44,9 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 
 ## Recent Changes
 
+### 8 May 2026
+- Upgrade makefile to use GCC 16 instead of 12. Seems to increase performance by just over 1%. 
+
 ### 11 April 2026
 - Add a custom pool allocator instead of relying on vector growth.
 
