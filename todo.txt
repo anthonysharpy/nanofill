@@ -16,3 +16,7 @@ it will either grow, prefetch a just-growed thing
 do we create too much on the stack? e.g. levels_orders
 
 spawning pools stress test
+
+create memory pools inside a memory pool for better locality
+
+don't push pools to the queue. push the actual "next" pointer. so we share less cache
