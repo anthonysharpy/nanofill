@@ -13,6 +13,6 @@ when we take ownership of a new pool, we should ask the CPU to load it into cach
 add needs main thread attention flag to pool -> pool will check then check what it needs to do
 it will either grow, prefetch a just-growed thing
 
-do we create too much on the stack?
+do we create too much on the stack? e.g. levels_orders
 
 spawning pools stress test
