@@ -64,6 +64,4 @@ struct Event {
 std::vector<Event>
 events_from_csv_data(const std::vector<consts::TradingDataCSVFormat>& csv_data);
 
-void print_event(const Event event);
-
 }

@@ -6,17 +6,6 @@
 
 namespace nanofill::events {
 
-// Print an event to the console for debugging.
-// デバッギングのために、コンソールにイベントを出力する。
-void print_event(const Event event) {
-    std::cout << "orderid=" << event.order_id
-        << "time=" << event.time
-        << "price=" << event.price
-        << "size=" << event.get_size_with_direction()
-        << "type=" << static_cast<int>(event.type)
-        << std::endl;
-}
-
 std::vector<Event>
 events_from_csv_data(const std::vector<consts::TradingDataCSVFormat>& csv_data) {
     std::vector<Event> events;
