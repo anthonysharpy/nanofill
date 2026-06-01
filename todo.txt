@@ -1,7 +1,5 @@
 if we divide price by 100 then we can half its types size as well as slash the orderbook size
 
-use std::size_t for array indexes if it makes it faster
-
 graph axis is kind of wrong - should start at 0?
 
 core pinning is wrong in netbook - 0+1 are not adjecent lcores. 0,4 etc are. need to make clear in
@@ -20,3 +18,5 @@ spawning pools stress test
 create memory pools inside a memory pool for better locality
 
 don't push pools to the queue. push the actual "next" pointer. so we share less cache
+
+    std::uint8_t events_found = 0; - probably faster as a larger type
