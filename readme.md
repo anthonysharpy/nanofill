@@ -44,6 +44,9 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 
 ## Recent Changes
 
+### 1 June 2026
+- Replace unsigned types (`std::size_t` etc) with `ptrdiff_t` in loops. `ptrdiff_t` is more easily optimisable by the compiler since it's a signed type. P75 and above gets a ~1.5% speed boost.
+
 ### 8 May 2026
 - Upgrade makefile to use GCC 16 instead of 12. Seems to increase performance by just over 1%. 
 

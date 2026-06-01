@@ -50,7 +50,7 @@ public:
             while (!stop.stop_requested()) {
                 auto count = orderbook::growth_buffer.pop_many(data, GROWTH_BUFFER_SIZE);
 
-                for (std::size_t n = 0; n < count; n++) {
+                for (ptrdiff_t n = 0; n < static_cast<ptrdiff_t>(count); ++n) {
                     data[n]->grow();
                 }
             }

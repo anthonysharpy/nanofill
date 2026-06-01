@@ -43,8 +43,6 @@ void event_consumer(
 
     std::uint32_t events_consumed = 0;
     Event events[8];
-    std::uint8_t events_found = 0;
-    std::uint8_t i = 0;
     std::chrono::steady_clock::time_point clock_start;
     std::chrono::steady_clock::time_point clock_end;
 
@@ -52,9 +50,9 @@ void event_consumer(
     // this would keep going.
     // すべてのイベントを処理する。それから、止める。本当の世界では、これが続く。
     while (events_consumed != 668765) {
-        events_found = event_buffer.pop_many(events, 8);
+        std::size_t events_found = event_buffer.pop_many(events, 8);
 
-        for (i = 0; i < events_found; ++i) {
+        for (ptrdiff_t i = 0; i < static_cast<ptrdiff_t>(events_found); ++i) {
             // Logging on this hot path is probably not a good idea for performance.
             // このホットパスでログするのは性能に悪いはずだ。
             clock_start = std::chrono::steady_clock::now();

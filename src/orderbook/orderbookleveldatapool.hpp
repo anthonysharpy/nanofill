@@ -222,7 +222,7 @@ namespace nanofill::orderbook {
             // このプールをチェックする。一斉に８つの値をチェックするため、明示的なSIMDを使う。
             //
             // 実は、キャッシュを読み込む必要がなくなるから、n < sizeをチェックしないほうが速い。
-            for (std::size_t n = 0; n < POOL_SIZE; n += 8) {
+            for (ptrdiff_t n = 0; n < static_cast<ptrdiff_t>(POOL_SIZE); n += 8) {
                 __m256i ids = _mm256_loadu_si256((__m256i*)&order_ids[n]);
                 __m256i cmp = _mm256_cmpeq_epi32(ids, target);
                 int mask = _mm256_movemask_epi8(cmp);
