@@ -60,7 +60,7 @@ void print_latency_distribution(const std::vector<std::uint32_t>& flattened_p999
     // Calculate the frequency table.
     // 度数表を計算する。
     for (const auto& latency : flattened_p999_data) {
-        unsigned int row = latency / frequency_table_increment_size;
+        int row = latency / frequency_table_increment_size;
 
         if (row >= frequency_table_rows) {
             row = frequency_table_rows-1;
