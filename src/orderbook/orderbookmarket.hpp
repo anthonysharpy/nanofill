@@ -14,15 +14,9 @@ using events::EventType;
 
 constexpr std::size_t order_book_size = 500000;
 
-// Note that this order book only supports one stock index (in our data - Microsoft).
-// For an order book that supports multiple, the choices here would probably be a lot
-// different (e.g. maybe stronger emphasis on rationing memory).
-// この注文板は一つの株価指数に対応している（Microsoft）。
-// 複数の株価指数に対応するために、ここでされている選択が全く違うほうがいいかもしれない（例えば、メモリ
-// の割り当ての制限を重視する）。
-class OrderBook {
+class OrderBookMarket {
 public:
-    OrderBook() noexcept {
+    OrderBookMarket() noexcept {
         levels_orders.resize(order_book_size);
 
         // Each level will get two pools by default. This provides us an opportunity for later

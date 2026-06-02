@@ -2,7 +2,7 @@
 
 #include "events/event.hpp"
 #include "concurrency/spscringbuffer.hpp"
-#include "orderbook/orderbook.hpp"
+#include "orderbook/orderbookmarket.hpp"
 #include "tradingengine/tradingengine.hpp"
 #include <array>
 #include <chrono>
@@ -10,7 +10,7 @@
 namespace nanofill::threads {
 
 using concurrency::SPSCRingBuffer;
-using orderbook::OrderBook;
+using orderbook::OrderBookMarket;
 using tradingengine::TradingEngine;
 using events::Event;
 
@@ -35,7 +35,7 @@ void event_producer(SPSCRingBuffer<Event, N>& event_buffer, const std::vector<Ev
 template<std::size_t N>
 void event_consumer(
     SPSCRingBuffer<Event, N>& event_buffer,
-    OrderBook& order_book,
+    OrderBookMarket& order_book,
     TradingEngine& trading_engine,
     std::vector<std::uint32_t>& performance_data
 ) noexcept {

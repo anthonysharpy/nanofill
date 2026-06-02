@@ -1,7 +1,7 @@
 #include "fileio/fileio.hpp"
 #include "fileio/csv.hpp"
 #include "events/event.hpp"
-#include "orderbook/orderbook.hpp"
+#include "orderbook/orderbookmarket.hpp"
 #include "concurrency/spscringbuffer.hpp"
 #include "tradingengine/tradingengine.hpp"
 #include "threads/threads.hpp"
@@ -15,7 +15,7 @@
 
 using nanofill::events::Event;
 using nanofill::tradingengine::TradingEngine;
-using nanofill::orderbook::OrderBook;
+using nanofill::orderbook::OrderBookMarket;
 using nanofill::concurrency::SPSCRingBuffer;
 
 void initialise() {
@@ -39,7 +39,7 @@ std::vector<std::uint32_t>
 process_events(
     const std::vector<Event>& events,
     TradingEngine& trading_engine,
-    OrderBook& order_book
+    OrderBookMarket& order_book
 ) {
     std::vector<std::uint32_t> performance_data;
     performance_data.resize(events.size());
@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Processing " << events.size() << " events " << runs << " times..." << std::endl;
 
     for (int i = 0; i < runs; ++i) {
-        OrderBook order_book;
+        OrderBookMarket order_book;
         TradingEngine trading_engine(10000);
 
         // ===== FROM HERE is where we care about performance ===== //

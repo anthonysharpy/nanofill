@@ -1,14 +1,14 @@
 #include "gtest/gtest.h"
-#include "orderbook/orderbook.hpp"
+#include "orderbook/orderbookmarket.hpp"
 #include "events/event.hpp"
 
 using nanofill::events::Event;
 using nanofill::events::EventType;
 using nanofill::events::TradeDirection;
-using nanofill::orderbook::OrderBook;
+using nanofill::orderbook::OrderBookMarket;
 
 TEST(OrderBook, ProcessSubmissionEvent) {
-    auto orderbook = OrderBook();
+    auto orderbook = OrderBookMarket();
 
     Event event {
         .price = 10,
@@ -62,7 +62,7 @@ TEST(OrderBook, ProcessSubmissionEvent) {
 }
 
 TEST(OrderBook, ProcessBigSubmissionEvent) {
-    auto orderbook = OrderBook();
+    auto orderbook = OrderBookMarket();
 
     Event event {
         .price = 10,
@@ -111,7 +111,7 @@ TEST(OrderBook, ProcessBigSubmissionEvent) {
 }
 
 TEST(OrderBook, ProcessCancellationEvent) {
-    auto orderbook = OrderBook();
+    auto orderbook = OrderBookMarket();
 
     Event cancellation_event {
         .price = 10,
@@ -149,7 +149,7 @@ TEST(OrderBook, ProcessCancellationEvent) {
 }
 
 TEST(OrderBook, ProcessCancellationEventChangesEventSizeCorrectly) {
-    auto orderbook = OrderBook();
+    auto orderbook = OrderBookMarket();
 
     Event submission_event {
         .price = 10,
@@ -214,7 +214,7 @@ TEST(OrderBook, ProcessCancellationEventChangesEventSizeCorrectly) {
 }
 
 TEST(OrderBook, ProcessVisibleExecutionEvent) {
-    auto orderbook = OrderBook();
+    auto orderbook = OrderBookMarket();
 
     Event execution_event {
         .price = 10,
@@ -247,7 +247,7 @@ TEST(OrderBook, ProcessVisibleExecutionEvent) {
 }
 
 TEST(OrderBook, ProcessDeletionEvent) {
-    auto orderbook = OrderBook();
+    auto orderbook = OrderBookMarket();
 
     Event deletion_event {
         .price = 10,
