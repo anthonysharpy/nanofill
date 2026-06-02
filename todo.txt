@@ -14,3 +14,5 @@ create memory pools inside a memory pool for better locality
 don't push pools to the queue. push the actual "next" pointer. so we share less cache
 
 std::uint8_t events_found = 0; - probably faster as a larger type
+
+move stuff back into cpp files ? maybe our link optimisation isn't right?
