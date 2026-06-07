@@ -2,37 +2,38 @@
 #include "tradingengine/tradingengine.hpp"
 
 using nanofill::events::Event;
+using nanofill::events::Event;
 using nanofill::events::EventType;
 using nanofill::events::TradeDirection;
 using nanofill::tradingengine::TradingEngine;
+using nanofill::orderbook::OrderBookMarketType;
 
 TEST(TradingEngine, ProcessAllEvents) {
-    auto trading_engine = TradingEngine(20);
-
     // Submission (buy).
     Event buy_submission_event {
         .price = 10,
         .time = 100,
         .order_id = 1000,
         .size = 10,
+        .market = OrderBookMarketType::MICROSOFT,
         .direction = TradeDirection::Positive,
         .type = EventType::Submission
     };
 
-    ASSERT_EQ(0U, trading_engine.total_market_price);
-    ASSERT_EQ(0U, trading_engine.market_shares);
-    ASSERT_EQ(0U, trading_engine.average_share_price);
-    ASSERT_EQ(0U, trading_engine.target_buy_price);
-    ASSERT_EQ(0U, trading_engine.target_sell_price);
+    ASSERT_EQ(0U, TradingEngine::get_total_market_price(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(0U, TradingEngine::get_market_shares(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(0U, TradingEngine::get_average_share_price(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(0U, TradingEngine::get_target_buy_price(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(0U, TradingEngine::get_target_sell_price(OrderBookMarketType::MICROSOFT));
 
-    trading_engine.process_event(buy_submission_event);
+    TradingEngine::process_event(buy_submission_event);
 
-    ASSERT_EQ(100U, trading_engine.total_market_price);
-    ASSERT_EQ(10U, trading_engine.market_shares);
-    ASSERT_EQ(10U, trading_engine.average_share_price);
+    ASSERT_EQ(100U, TradingEngine::get_total_market_price(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(10U, TradingEngine::get_market_shares(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(10U, TradingEngine::get_average_share_price(OrderBookMarketType::MICROSOFT));
 
-    ASSERT_EQ(0U, trading_engine.target_buy_price);
-    ASSERT_EQ(30U, trading_engine.target_sell_price);
+    ASSERT_EQ(0U, TradingEngine::get_target_buy_price(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(30U, TradingEngine::get_target_sell_price(OrderBookMarketType::MICROSOFT));
 
     // Submission (sell).
     Event sell_submission_event {
@@ -40,18 +41,19 @@ TEST(TradingEngine, ProcessAllEvents) {
         .time = 105,
         .order_id = 1001,
         .size = 10,
+        .market = OrderBookMarketType::MICROSOFT,
         .direction = TradeDirection::Negative,
         .type = EventType::Submission
     };
 
-    trading_engine.process_event(sell_submission_event);
+    TradingEngine::process_event(sell_submission_event);
 
-    ASSERT_EQ(300U, trading_engine.total_market_price);
-    ASSERT_EQ(20U, trading_engine.market_shares);
-    ASSERT_EQ(15U, trading_engine.average_share_price);
+    ASSERT_EQ(300U, TradingEngine::get_total_market_price(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(20U, TradingEngine::get_market_shares(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(15U, TradingEngine::get_average_share_price(OrderBookMarketType::MICROSOFT));
 
-    ASSERT_EQ(0U, trading_engine.target_buy_price);
-    ASSERT_EQ(35U, trading_engine.target_sell_price);
+    ASSERT_EQ(0U, TradingEngine::get_target_buy_price(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(35U, TradingEngine::get_target_sell_price(OrderBookMarketType::MICROSOFT));
 
     // Partial cancellation.
     Event cancellation_event {
@@ -59,18 +61,19 @@ TEST(TradingEngine, ProcessAllEvents) {
         .time = 110,
         .order_id = 1001,
         .size = 5,
+        .market = OrderBookMarketType::MICROSOFT,
         .direction = TradeDirection::Negative,
         .type = EventType::Cancellation
     };
 
-    trading_engine.process_event(cancellation_event);
+    TradingEngine::process_event(cancellation_event);
 
-    ASSERT_EQ(200U, trading_engine.total_market_price);
-    ASSERT_EQ(15U, trading_engine.market_shares);
-    ASSERT_EQ(13U, trading_engine.average_share_price); // 200 / 15 = 13.333...
+    ASSERT_EQ(200U, TradingEngine::get_total_market_price(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(15U, TradingEngine::get_market_shares(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(13U, TradingEngine::get_average_share_price(OrderBookMarketType::MICROSOFT)); // 200 / 15 = 13.333...
 
-    ASSERT_EQ(0U, trading_engine.target_buy_price);
-    ASSERT_EQ(33U, trading_engine.target_sell_price);
+    ASSERT_EQ(0U, TradingEngine::get_target_buy_price(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(33U, TradingEngine::get_target_sell_price(OrderBookMarketType::MICROSOFT));
 
     // Deletion.
     Event deletion_event {
@@ -78,18 +81,19 @@ TEST(TradingEngine, ProcessAllEvents) {
         .time = 115,
         .order_id = 1001,
         .size = 5,
+        .market = OrderBookMarketType::MICROSOFT,
         .direction = TradeDirection::Positive,
         .type = EventType::Deletion
     };
 
-    trading_engine.process_event(deletion_event);
+    TradingEngine::process_event(deletion_event);
 
-    ASSERT_EQ(100U, trading_engine.total_market_price);
-    ASSERT_EQ(10U, trading_engine.market_shares);
-    ASSERT_EQ(10U, trading_engine.average_share_price);
+    ASSERT_EQ(100U, TradingEngine::get_total_market_price(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(10U, TradingEngine::get_market_shares(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(10U, TradingEngine::get_average_share_price(OrderBookMarketType::MICROSOFT));
 
-    ASSERT_EQ(0U, trading_engine.target_buy_price);
-    ASSERT_EQ(30U, trading_engine.target_sell_price);
+    ASSERT_EQ(0U, TradingEngine::get_target_buy_price(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(30U, TradingEngine::get_target_sell_price(OrderBookMarketType::MICROSOFT));
 
     // Visible Execution.
     Event visible_execution_event {
@@ -97,26 +101,27 @@ TEST(TradingEngine, ProcessAllEvents) {
         .time = 120,
         .order_id = 1000,
         .size = 5,
+        .market = OrderBookMarketType::MICROSOFT,
         .direction = TradeDirection::Positive,
         .type = EventType::ExecutionVisible
     };
 
-    ASSERT_EQ(trading_engine.last_execution_order.order_id, 0U);
+    ASSERT_EQ(TradingEngine::get_last_execution_order(OrderBookMarketType::MICROSOFT).order_id, 0U);
 
-    trading_engine.process_event(visible_execution_event);
+    TradingEngine::process_event(visible_execution_event);
 
-    ASSERT_EQ(50U, trading_engine.total_market_price);
-    ASSERT_EQ(5U, trading_engine.market_shares);
-    ASSERT_EQ(10U, trading_engine.average_share_price);
+    ASSERT_EQ(50U, TradingEngine::get_total_market_price(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(5U, TradingEngine::get_market_shares(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(10U, TradingEngine::get_average_share_price(OrderBookMarketType::MICROSOFT));
 
-    ASSERT_EQ(0U, trading_engine.target_buy_price);
-    ASSERT_EQ(30U, trading_engine.target_sell_price);
+    ASSERT_EQ(0U, TradingEngine::get_target_buy_price(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(30U, TradingEngine::get_target_sell_price(OrderBookMarketType::MICROSOFT));
 
-    ASSERT_EQ(trading_engine.last_execution_order.order_id, 1000U);
-    ASSERT_EQ(trading_engine.last_execution_order.price, 10U);
-    ASSERT_EQ(trading_engine.last_execution_order.size, 5U);
-    ASSERT_EQ(trading_engine.last_execution_order.time, 120U);
-    ASSERT_EQ(trading_engine.last_execution_order.type, EventType::ExecutionVisible);
+    ASSERT_EQ(TradingEngine::get_last_execution_order(OrderBookMarketType::MICROSOFT).order_id, 1000U);
+    ASSERT_EQ(TradingEngine::get_last_execution_order(OrderBookMarketType::MICROSOFT).price, 10U);
+    ASSERT_EQ(TradingEngine::get_last_execution_order(OrderBookMarketType::MICROSOFT).size, 5U);
+    ASSERT_EQ(TradingEngine::get_last_execution_order(OrderBookMarketType::MICROSOFT).time, 120U);
+    ASSERT_EQ(TradingEngine::get_last_execution_order(OrderBookMarketType::MICROSOFT).type, EventType::ExecutionVisible);
 
     // Hidden Execution.
     Event hidden_execution_event {
@@ -124,43 +129,45 @@ TEST(TradingEngine, ProcessAllEvents) {
         .time = 120,
         .order_id = 1000,
         .size = 5,
+        .market = OrderBookMarketType::MICROSOFT,
         .direction = TradeDirection::Positive,
         .type = EventType::ExecutionHidden
     };
 
     // Nothing should change as we don't process hidden execution.
-    trading_engine.process_event(hidden_execution_event);
+    TradingEngine::process_event(hidden_execution_event);
 
-    ASSERT_EQ(50U, trading_engine.total_market_price);
-    ASSERT_EQ(5U, trading_engine.market_shares);
-    ASSERT_EQ(10U, trading_engine.average_share_price);
+    ASSERT_EQ(50U, TradingEngine::get_total_market_price(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(5U, TradingEngine::get_market_shares(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(10U, TradingEngine::get_average_share_price(OrderBookMarketType::MICROSOFT));
 
-    ASSERT_EQ(0U, trading_engine.target_buy_price);
-    ASSERT_EQ(30U, trading_engine.target_sell_price);
+    ASSERT_EQ(0U, TradingEngine::get_target_buy_price(OrderBookMarketType::MICROSOFT));
+    ASSERT_EQ(30U, TradingEngine::get_target_sell_price(OrderBookMarketType::MICROSOFT));
 
-    ASSERT_EQ(trading_engine.last_execution_order.order_id, 1000U);
-    ASSERT_EQ(trading_engine.last_execution_order.price, 10U);
-    ASSERT_EQ(trading_engine.last_execution_order.size, 5U);
-    ASSERT_EQ(trading_engine.last_execution_order.time, 120U);
-    ASSERT_EQ(trading_engine.last_execution_order.type, EventType::ExecutionVisible);
+    ASSERT_EQ(TradingEngine::get_last_execution_order(OrderBookMarketType::MICROSOFT).order_id, 1000U);
+    ASSERT_EQ(TradingEngine::get_last_execution_order(OrderBookMarketType::MICROSOFT).price, 10U);
+    ASSERT_EQ(TradingEngine::get_last_execution_order(OrderBookMarketType::MICROSOFT).size, 5U);
+    ASSERT_EQ(TradingEngine::get_last_execution_order(OrderBookMarketType::MICROSOFT).time, 120U);
+    ASSERT_EQ(TradingEngine::get_last_execution_order(OrderBookMarketType::MICROSOFT).type, EventType::ExecutionVisible);
+
+    TradingEngine::reset_market(OrderBookMarketType::MICROSOFT);
 }
 
 TEST(TradingEngine, DoesntCrashWhenSharesReachZero) {
-    auto trading_engine = TradingEngine(20);
-
     // Submission (buy).
     Event buy_submission_event {
         .price = 10,
         .time = 100,
         .order_id = 1000,
         .size = 10,
+        .market = OrderBookMarketType::MICROSOFT,
         .direction = TradeDirection::Positive,
         .type = EventType::Submission
     };
 
-    trading_engine.process_event(buy_submission_event);
+    TradingEngine::process_event(buy_submission_event);
 
-    ASSERT_EQ(10U, trading_engine.market_shares);
+    ASSERT_EQ(10U, TradingEngine::get_market_shares(OrderBookMarketType::MICROSOFT));
 
     // Deletion.
     Event deletion_event {
@@ -168,11 +175,14 @@ TEST(TradingEngine, DoesntCrashWhenSharesReachZero) {
         .time = 115,
         .order_id = 1000,
         .size = 10,
+        .market = OrderBookMarketType::MICROSOFT,
         .direction = TradeDirection::Positive,
         .type = EventType::Deletion
     };
 
-    trading_engine.process_event(deletion_event);
+    TradingEngine::process_event(deletion_event);
 
-    ASSERT_EQ(0U, trading_engine.market_shares);
+    ASSERT_EQ(0U, TradingEngine::get_market_shares(OrderBookMarketType::MICROSOFT));
+
+    TradingEngine::reset_market(OrderBookMarketType::MICROSOFT);
 }

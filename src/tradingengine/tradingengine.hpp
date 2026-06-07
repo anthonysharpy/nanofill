@@ -1,95 +1,73 @@
 #pragma once
 
 #include "events/event.hpp"
+#include "tradingenginemarket.hpp"
+#include "orderbook/orderbookconfig.hpp"
 #include <cstdlib>
 
-// Most of this code is really just a simple example since this will be mostly business logic.
-// This currently only supports one market index.
-// これは普通にビジネスロジックだから、これは大体ただの簡単な例だ。
-// これは一つの株価指数に対応している。
 namespace nanofill::tradingengine {
 
 using events::Event;
 using events::EventType;
+using orderbook::OrderBookMarketType;
 
 class TradingEngine {
+    inline static std::array<TradingEngineMarket, orderbook::MARKET_COUNT_SIZE_T> markets;  
+
 public:
-    // Sum of the value of all orders in 10,000ths of a dollar. This includes both sell and buy orders.
-    // E.g. $100 sell and $100 buy would be $200 (2,000,000).
-    // 10,000倍したドルの価格での各注文の価値の合計。売り注文と買い注文が含まれている。たとえば、$100売り注文と
-    // $100買い注文は$200になる。
-    std::uint64_t total_market_price = 0;
-    // Number of shares wanting to be bought or sold.
-    // 買ってもらいたいと売ってもらいたい株の合計。
-    std::uint64_t market_shares = 0;
-    // Current average share price in 10,000ths of a dollar.
-    // 10,000倍したドルの価格での平均株価。
-    std::uint32_t average_share_price = 0;
-    // The last execution order we've seen.
-    // 直近の実行された注文。
-    Event last_execution_order{};
-    // The price the engine wants to buy at.
-    // 取引処理エンジンが買ってもらいたい価格。
-    std::uint32_t target_buy_price = 0;
-    // The price the engine wants to sell at.
-    // 取引処理エンジンが売ってもらいたい価格。
-    std::uint32_t target_sell_price = 0;
-    
-    TradingEngine(const int price_spread) noexcept;
-
     [[gnu::always_inline]]
-    void process_event(const Event event) noexcept {
-        if (event.type == EventType::Submission) {
-            process_order_added_event(event);
-        } else if (event.type != EventType::ExecutionHidden) {
-            process_order_removed_event(event);
-        } else {
-            // Processing would lead to strange results since this order was never recorded.
-            // この注文は記録されていないので、処理すれば、変なことが起こる。
-            return;
-        }
-
-        update_position();
-    }
-
-private:
-    // The distance from the average market price that we are willing to buy/sell at.
-    // 売ってもらいたい・買ってもらいたい平均株価からの距離。
-    std::uint32_t price_spread = 0;
-
-    // The market value has changed. Update our position.
-    // 時価が変わって、ポジションを更新しよう。
-    [[gnu::always_inline]]
-    void update_position() noexcept {
-        target_buy_price = price_spread > average_share_price ? 0 : average_share_price - price_spread;
-        target_sell_price = average_share_price + price_spread;
+    static void process_event(const Event event) noexcept {
+        markets[static_cast<std::size_t>(event.market)].process_event(event);
     }
 
     [[gnu::always_inline]]
-    void process_order_removed_event(const Event event) noexcept {
-        // A cancellation/deletion event will always contain the correct size, so we don't need
-        // to look it up.
-        // 削除のイベントなどはいつも正しいイベントのサイズを含められて、検索する必要がない。
-        total_market_price -= event.size * event.price;
-        market_shares -= event.size;
-
-        average_share_price = market_shares > 0 ? total_market_price / market_shares : 0;
-
-        if (event.type == EventType::ExecutionHidden || event.type == EventType::ExecutionVisible) {
-            last_execution_order = event;
-        }
+    static void update_position(const OrderBookMarketType market) noexcept {
+        markets[static_cast<std::size_t>(market)].update_position();
     }
 
     [[gnu::always_inline]]
-    void process_order_added_event(const Event event) noexcept {
-        total_market_price += event.size * event.price;
-        market_shares += event.size;
+    static void process_order_removed_event(const Event event) noexcept {
+        markets[static_cast<std::size_t>(event.market)].process_order_removed_event(event);
+    }
 
-        if (market_shares > 0) {
-            average_share_price = total_market_price / market_shares;
-        } else {
-            average_share_price = 0;
-        }
+    [[gnu::always_inline]]
+    static void process_order_added_event(const Event event) noexcept {
+        markets[static_cast<std::size_t>(event.market)].process_order_added_event(event);
+    }
+
+    [[gnu::always_inline]]
+    static std::uint64_t get_total_market_price(const OrderBookMarketType market) noexcept {
+        return markets[static_cast<std::size_t>(market)].total_market_price;
+    }
+
+    [[gnu::always_inline]]
+    static std::uint64_t get_market_shares(const OrderBookMarketType market) noexcept {
+        return markets[static_cast<std::size_t>(market)].market_shares;
+    }
+
+    [[gnu::always_inline]]
+    static std::uint32_t get_average_share_price(const OrderBookMarketType market) noexcept {
+        return markets[static_cast<std::size_t>(market)].average_share_price;
+    }
+
+    [[gnu::always_inline]]
+    static std::uint32_t get_target_buy_price(const OrderBookMarketType market) noexcept {
+        return markets[static_cast<std::size_t>(market)].target_buy_price;
+    }
+
+    [[gnu::always_inline]]
+    static std::uint32_t get_target_sell_price(const OrderBookMarketType market) noexcept {
+        return markets[static_cast<std::size_t>(market)].target_sell_price;
+    }
+
+    [[gnu::always_inline]]
+    static Event get_last_execution_order(const OrderBookMarketType market) noexcept {
+        return markets[static_cast<std::size_t>(market)].last_execution_order;
+    }
+
+    [[gnu::always_inline]]
+    static void reset_market(const OrderBookMarketType market) noexcept {
+        markets[static_cast<size_t>(market)] = TradingEngineMarket();
     }
 };
 

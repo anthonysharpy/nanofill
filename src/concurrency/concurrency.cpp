@@ -1,8 +1,8 @@
 #include <pthread.h>
 #include "concurrency.hpp"
 #include <cstdint>
-#include <iostream>
 #include <thread>
+#include <print>
 
 namespace nanofill::concurrency {
 
@@ -15,7 +15,7 @@ void pin_thread_to_core(int core_id) {
     int ret = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
 
     if (ret != 0) {
-        std::cout << "Pinning thread failed with error code " << ret << std::endl;
+        std::println("Pinning thread failed with error code {}", ret);
         std::abort();
     }
 }

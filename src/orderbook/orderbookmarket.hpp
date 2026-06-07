@@ -12,13 +12,13 @@ namespace nanofill::orderbook {
 using events::Event;
 using events::EventType;
 
-constexpr std::size_t order_book_size = 500000;
+constexpr std::size_t ORDER_BOOK_SIZE = 5000;
 
 class OrderBookMarket {
+    friend class OrderBook;
+
 public:
     OrderBookMarket() noexcept {
-        levels_orders.resize(order_book_size);
-
         // Each level will get two pools by default. This provides us an opportunity for later
         // optimisations in the hot loop because all we have to do is check if .growth_requested
         // is set to false.
@@ -32,25 +32,9 @@ public:
         for (auto& level : levels_orders) {
             level.initial_grow();
         }
-
-        levels_last_modified.resize(order_book_size);
-        levels_size.resize(order_book_size);
-
-        memory_allocator_thread = std::jthread([](std::stop_token stop){
-            concurrency::pin_thread_to_core(1);
-
-            orderbook::OrderBookLevelDataPool* data[GROWTH_BUFFER_SIZE];
-
-            while (!stop.stop_requested()) {
-                auto count = orderbook::growth_buffer.pop_many(data, GROWTH_BUFFER_SIZE);
-
-                for (ptrdiff_t n = 0; n < static_cast<ptrdiff_t>(count); ++n) {
-                    data[n]->grow();
-                }
-            }
-        });
     }
 
+private:
     // Returns true if the event was actioned, false if not.
     // 処理したら、trueを返す。または、false。
     [[gnu::always_inline]]
@@ -98,7 +82,6 @@ public:
         return levels_orders[price].get_order_data_by_order_id(order_id);
     }
     
-private:
     // Data for all order book levels. We'll store this in vectors instead of structs,
     // as this can give us better cache locality. Each index of each array will represent
     // each possible price.
@@ -107,15 +90,13 @@ private:
 
     // The time of the last event on each level (according to the event).
     // 各レベルの最後のイベントの時（イベントによって）。
-    std::vector<std::uint32_t> levels_last_modified;
+    std::array<std::uint32_t, ORDER_BOOK_SIZE> levels_last_modified{};
     // The number of shares on each level.
     // 各レベルの株の数。
-    std::vector<std::uint32_t> levels_size;
+    std::array<std::uint32_t, ORDER_BOOK_SIZE> levels_size{};
     // The orders on each level.
     // 各レベルの注文。
-    std::vector<OrderBookLevelDataPool> levels_orders;
-
-    std::jthread memory_allocator_thread;
+    std::array<OrderBookLevelDataPool, ORDER_BOOK_SIZE> levels_orders{};
 
     // An order has been entirely deleted.
     // 注文が完全に削除された。

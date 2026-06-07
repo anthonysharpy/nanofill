@@ -1,5 +1,3 @@
-if we divide price by 100 then we can half its types size as well as slash the orderbook size
-
 graph axis is kind of wrong - should start at 0?
 
 when we take ownership of a new pool, we should ask the CPU to load it into cache. maybe
@@ -15,4 +13,18 @@ don't push pools to the queue. push the actual "next" pointer. so we share less 
 
 std::uint8_t events_found = 0; - probably faster as a larger type
 
-move stuff back into cpp files ? maybe our link optimisation isn't right?
+don't give markets a fixed size?
+
+event type needs to know what market it's for.
+split event into two types -> incoming events and event
+
+dont pin to core 0 because it's the core the os uses
+
+kind of think all the nanofill:: prefixes are a bit unnecessary, remove?
+
+check if we can use bit masks anywhere in if conditions
+
+LevelPriceData::price is pointless to store because it's already known
+
+OrderBook::reset_market may cause a use after free because the allocator thread might still access it.
+Currently it's fine though because that function is only used for tests

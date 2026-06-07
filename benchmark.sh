@@ -220,4 +220,6 @@ while true; do
 
     run_count=$(( run_count + 1 ))
     draw_table "$run_count"
+
+    sleep 4
 done

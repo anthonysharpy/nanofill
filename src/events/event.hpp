@@ -1,6 +1,7 @@
 #pragma once
 
 #include "consts/consts.hpp"
+#include "orderbook/orderbookconfig.hpp"
 #include <cstdint>
 #include <vector>
 #include <new>
@@ -42,8 +43,8 @@ enum class EventType : std::uint8_t {
 // A trading event.
 // 取引のイベント。
 struct Event {
-    // Dollar price times 10,000.
-    // 10,000倍したドルの価格。
+    // Dollar price times 100.
+    // 100倍したドルの価格。
     std::uint32_t price;
     // Seconds after midnight the event happened.
     // イベントが発生したときからの零時から数秒。
@@ -52,6 +53,7 @@ struct Event {
     // Number of shares.
     // 株の数。
     std::uint32_t size;
+    orderbook::OrderBookMarketType market;
     TradeDirection direction;
     EventType type;
 

@@ -18,7 +18,7 @@ events_from_csv_data(const std::vector<consts::TradingDataCSVFormat>& csv_data) 
         events[i].type = static_cast<EventType>(std::get<1>(event_data));
         events[i].order_id = std::get<2>(event_data);
         events[i].size = std::get<3>(event_data);
-        events[i].price = std::get<4>(event_data);
+        events[i].price = std::get<4>(event_data) / 100;
         events[i].direction = static_cast<TradeDirection>(std::get<5>(event_data));
     }
 
