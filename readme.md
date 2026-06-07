@@ -44,18 +44,18 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 
 ## Recent Changes
 
-### 6 June 2026
+### 7 June 2026
 - Add support for multiple markets as well as some other changes and improvements in latency (details below). P75-P99 has seen an average 20-26% speedup, P50 is ~10.7% faster and P0 is also about 1% faster on average.
 - Add support for multiple markets. Markets are configured and represented by an enum.
 
     The code works similarly to how it did before, except each market now gets its own copy of the data. Initially, this caused the program to take up 8GB of memory for just 10 markets. However, upon noticing that we were supporting fractional pence even though the data doesn't have any fractional pence in it, it was posible to cut the memory footprint by 100x. Thus, the program now only uses around 80MB of memory. This probably contributed to the large performance improvements seen; the memory has become more compact and thus has less CPU cache turnover.
 
-    The code does not interact with each market directly; instead, it must go through the `OrderBook` and `TradingEngine` classes, whose members have been made static with `[[gnu::always_inline]]` in order to turn them into zero-cost wrappers.
+    The code does not interact with each market directly; instead, it must go through the `OrderBook` and `TradingEngine` classes, whose members have been made static with `[[gnu::always_inline]]` in order to turn them into zero-cost wrappers. This just makes the code simpler.
 
-    We duplicate the data for each market, meaning we are now processing 10x as much data as before. The incoming event data has the markets shuffled. For example, the first event will be for market 1, the second event for market 2, and so on. This means that we are constantly putting pressure on the cache since the market we are accessing is constantly changing, making it quite a realistic test.
+    The data is duplicated for each market, meaning we are now processing 10x as much data as before. The incoming event data has the markets shuffled. For example, the first event will be for market 1, the second event for market 2, and so on. This means that we are constantly putting pressure on the cache since the market we are accessing is constantly changing, making it quite a realistic test.
 - Fix a rather bad bug that caused 1/8th of all orders to be unfindable, causing massive slowdowns as well as incorrect behaviour.
 
-    The reason this bug was hard to find was due to the fact that the tests weren't thorough enough. In order for it to happen, at least 8 orders had to be created - the 8th would always be unfindable.
+    The reason this bug was hard to find was due to the fact that the tests weren't thorough enough yet. In order for it to happen, at least 8 orders had to be created - the 8th would always be unfindable.
 
     The reason for this was because of this code:
 
