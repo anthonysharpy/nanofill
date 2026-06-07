@@ -1,0 +1,91 @@
+#pragma once
+
+#include "events/event.hpp"
+#include <cstdlib>
+
+// Most of this code is really just a simple example since this will be mostly business logic.
+// これは普通にビジネスロジックだから、これは大体ただの簡単な例だ。
+namespace nanofill::tradingengine {
+
+using events::Event;
+using events::EventType;
+
+class TradingEngineMarket {
+    friend class TradingEngine;
+
+    // Sum of the value of all orders in 100ths of a dollar. This includes both sell and buy orders.
+    // E.g. $100 sell and $100 buy would be $200 (20000).
+    // 100倍したドルの価格での各注文の価値の合計。売り注文と買い注文が含まれている。たとえば、$100売り注文と
+    // $100買い注文は$200になる。
+    std::uint64_t total_market_price = 0;
+    // Number of shares wanting to be bought or sold.
+    // 買ってもらいたいと売ってもらいたい株の合計。
+    std::uint64_t market_shares = 0;
+    // Current average share price in 100ths of a dollar.
+    // 100倍したドルの価格での平均株価。
+    std::uint32_t average_share_price = 0;
+    // The last execution order we've seen.
+    // 直近の実行された注文。
+    Event last_execution_order{};
+    // The price the engine wants to buy at.
+    // 取引処理エンジンが買ってもらいたい価格。
+    std::uint32_t target_buy_price = 0;
+    // The price the engine wants to sell at.
+    // 取引処理エンジンが売ってもらいたい価格。
+    std::uint32_t target_sell_price = 0;
+    // The distance from the average market price that we are willing to buy/sell at.
+    // 売ってもらいたい・買ってもらいたい平均株価からの距離。
+    std::uint32_t price_spread = 20;
+
+    [[gnu::always_inline]]
+    void process_event(const Event event) noexcept {
+        if (event.type == EventType::Submission) {
+            process_order_added_event(event);
+        } else if (event.type != EventType::ExecutionHidden) {
+            process_order_removed_event(event);
+        } else {
+            // Processing would lead to strange results since this order was never recorded.
+            // この注文は記録されていないので、処理すれば、変なことが起こる。
+            return;
+        }
+
+        update_position();
+    }
+
+    // The market value has changed. Update our position.
+    // 時価が変わって、ポジションを更新しよう。
+    [[gnu::always_inline]]
+    void update_position() noexcept {
+        target_buy_price = price_spread > average_share_price ? 0 : average_share_price - price_spread;
+        target_sell_price = average_share_price + price_spread;
+    }
+
+    [[gnu::always_inline]]
+    void process_order_removed_event(const Event event) noexcept {
+        // A cancellation/deletion event will always contain the correct size, so we don't need
+        // to look it up.
+        // 削除のイベントなどはいつも正しいイベントのサイズを含められて、検索する必要がない。
+        total_market_price -= event.size * event.price;
+        market_shares -= event.size;
+
+        average_share_price = market_shares > 0 ? total_market_price / market_shares : 0;
+
+        if (event.type == EventType::ExecutionHidden || event.type == EventType::ExecutionVisible) {
+            last_execution_order = event;
+        }
+    }
+
+    [[gnu::always_inline]]
+    void process_order_added_event(const Event event) noexcept {
+        total_market_price += event.size * event.price;
+        market_shares += event.size;
+
+        if (market_shares > 0) {
+            average_share_price = total_market_price / market_shares;
+        } else {
+            average_share_price = 0;
+        }
+    }
+};
+
+}

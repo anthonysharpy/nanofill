@@ -7,8 +7,8 @@ using nanofill::events::EventType;
 TEST(Events, EventsFromCSVData) {
     std::vector<nanofill::consts::TradingDataCSVFormat> csv_data = {
         { 0, 1, 1001, 10, 25000, 1 },
-        { 500, 2, 1002,  5, 24990, -1 },
-        { 1000, 3, 1003, 20, 25010, 1 }
+        { 500, 2, 1002,  5, 24900, -1 },
+        { 1000, 3, 1003, 20, 25000, 1 }
     };
 
     auto events = nanofill::events::events_from_csv_data(csv_data);
@@ -19,9 +19,9 @@ TEST(Events, EventsFromCSVData) {
     ASSERT_EQ(events[1].order_id, 1002U);
     ASSERT_EQ(events[2].order_id, 1003U);
 
-    ASSERT_EQ(events[0].price, 25000U);
-    ASSERT_EQ(events[1].price, 24990U);
-    ASSERT_EQ(events[2].price, 25010U);
+    ASSERT_EQ(events[0].price, 250U);
+    ASSERT_EQ(events[1].price, 249U);
+    ASSERT_EQ(events[2].price, 250U);
 
     ASSERT_EQ(events[0].get_size_with_direction(), 10);
     ASSERT_EQ(events[1].get_size_with_direction(), -5);

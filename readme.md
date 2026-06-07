@@ -1,6 +1,6 @@
 # NanoFill
 
-NanoFill is a C++ low-latency market data orderbook and trading engine that records and analyses real market data.
+NanoFill is a C++ low-latency market data orderbook and trading engine with support for multiple markets.
 
 The system is designed with a number of low-latency techniques:
 
@@ -23,7 +23,7 @@ The software comes complete with the ability to produce its own latency distribu
 
 The purpose of this is to demonstrate the implementation of fast, low-latency programming techniques. It does not particularly show off any complex algorithms. For an example of complex mathematics and algorithms, see https://github.com/anthonysharpy/theta-surface.
 
-This program was optimised based on the provided data, namely, the ~670,000 market order events. The optimisation decisions made in this program do not necessarily reflect those that might be advisable in a real production system, where data and throughput would likely differ greatly.
+This program was optimised based on the provided data, namely, the ~6,700,000 market order events. The optimisation decisions made in this program do not necessarily reflect those that might be advisable in a real production system, where data and throughput would likely differ greatly.
 
 # Usage
 
@@ -43,6 +43,45 @@ Once built, simply run the executable.
 Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 
 ## Recent Changes
+
+### 6 June 2026
+- Add support for multiple markets as well as some other changes and improvements in latency (details below). P75-P99 has seen an average 20-26% speedup, P50 is ~10.7% faster and P0 is also about 1% faster on average.
+- Add support for multiple markets. Markets are configured and represented by an enum.
+
+    The code works similarly to how it did before, except each market now gets its own copy of the data. Initially, this caused the program to take up 8GB of memory for just 10 markets. However, upon noticing that we were supporting fractional pence even though the data doesn't have any fractional pence in it, it was posible to cut the memory footprint by 100x. Thus, the program now only uses around 80MB of memory. This probably contributed to the large performance improvements seen; the memory has become more compact and thus has less CPU cache turnover.
+
+    The code does not interact with each market directly; instead, it must go through the `OrderBook` and `TradingEngine` classes, whose members have been made static with `[[gnu::always_inline]]` in order to turn them into zero-cost wrappers.
+
+    We duplicate the data for each market, meaning we are now processing 10x as much data as before. The incoming event data has the markets shuffled. For example, the first event will be for market 1, the second event for market 2, and so on. This means that we are constantly putting pressure on the cache since the market we are accessing is constantly changing, making it quite a realistic test.
+- Fix a rather bad bug that caused 1/8th of all orders to be unfindable, causing massive slowdowns as well as incorrect behaviour.
+
+    The reason this bug was hard to find was due to the fact that the tests weren't thorough enough. In order for it to happen, at least 8 orders had to be created - the 8th would always be unfindable.
+
+    The reason for this was because of this code:
+
+    ```
+    int mask = _mm256_movemask_epi8(cmp);
+
+    if (mask > 0) {
+        // Divide by four to get position.
+        return n + (__builtin_ctz(mask) >> 2);
+    }
+    ```
+
+    `mask` shows where (and if) an order ID was found during a SIMD operation (basically, we put a bunch of order IDs into a 256-bit register to check 8 order IDs at once).
+
+    However, if the order ID were found in the 8th slot, this would have set the highest 4 bits to 1. Because `mask` was an int, this made the number negative, meaning  `mask > 0` would always be false for the 8th order and it would never be found.
+
+    The fix was simply to make this an `unsigned int`.
+- Add a 4 second delay into the benchmarking script between runs. Previously, the CPU was getting throttled, which caused it to heat up and make the performance data drift in strange ways. Now it's much more stable, even after an equivalent number of runs.
+- Replace the `std::unique_ptr` that points to the next market data memory pool with an `std::atomic<OrderBookLevelDataPool*>`, and add a destructor to clean this up manually.
+    
+    The main reason for doing this is because when we were accessing the memory pool pointed to by `next` from the main thread and the pool allocator thread, we were reading and writing from it without any kind of formal synchronisation mechanism. In reality this worked fine because x86 supports this kind of behaviour, but technically this is undefined behaviour in C++; the compiler is free to rearrange/optimise operations within each thread, so there's a theoretical chance it could lead to inconsistent behaviour, like the `next` pointer becoming available to the other thread while the data it's pointing to has not even been initialised yet. The best fix was to make this atomic. In doing so, the `std::unique_ptr` turned into an additional layer of complication, and it made more sense to ditch it.
+- Replace uses of `std::cout` with the more modern `std::println`. It produces much nicer code.
+- Replace some vectors that never grew with arrays, which also helps us sidestep issues caused by the implicitly deleted copy operators caused by use of atomics.
+- Make the trading engine code .hpp only (95% of it already was). From benchmarking, .hpp files generally seem to provide the compiler a better chance of performing as many optimisations as possible as it reduces the number of code boundaries it has to reason over, even when using link-time optimisation.
+- Make the program output its memory usage on startup.
+- Fix alignment of the `next` pointer inside the data pools - the start of it was aligned but not the end, possibly causing a very minor slowdown.
 
 ### 1 June 2026
 - Replace unsigned types (`std::size_t` etc) with `ptrdiff_t` in loops. `ptrdiff_t` is more easily optimisable by the compiler since it's a signed type. P75 and above gets a ~1.5% speed boost.

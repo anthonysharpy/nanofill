@@ -2,15 +2,18 @@
 
 #include "events/event.hpp"
 #include "concurrency/spscringbuffer.hpp"
-#include "orderbook/orderbookmarket.hpp"
+#include "orderbook/orderbook.hpp"
+#include "orderbook/orderbookconfig.hpp"
 #include "tradingengine/tradingengine.hpp"
 #include <array>
 #include <chrono>
+#include <print>
 
 namespace nanofill::threads {
 
 using concurrency::SPSCRingBuffer;
-using orderbook::OrderBookMarket;
+using orderbook::OrderBook;
+using orderbook::OrderBookMarketType;
 using tradingengine::TradingEngine;
 using events::Event;
 
@@ -35,8 +38,6 @@ void event_producer(SPSCRingBuffer<Event, N>& event_buffer, const std::vector<Ev
 template<std::size_t N>
 void event_consumer(
     SPSCRingBuffer<Event, N>& event_buffer,
-    OrderBookMarket& order_book,
-    TradingEngine& trading_engine,
     std::vector<std::uint32_t>& performance_data
 ) noexcept {
     concurrency::pin_thread_to_core(0);
@@ -49,7 +50,7 @@ void event_consumer(
     // Consume all the events. We'll stop when we've processed them all. In the real world,
     // this would keep going.
     // すべてのイベントを処理する。それから、止める。本当の世界では、これが続く。
-    while (events_consumed != 668765) {
+    while (events_consumed != 668765 * nanofill::orderbook::MARKET_COUNT) {
         std::size_t events_found = event_buffer.pop_many(events, 8);
 
         for (ptrdiff_t i = 0; i < static_cast<ptrdiff_t>(events_found); ++i) {
@@ -57,11 +58,11 @@ void event_consumer(
             // このホットパスでログするのは性能に悪いはずだ。
             clock_start = std::chrono::steady_clock::now();
 
-            if (order_book.process_event(events[i])) {
+            if (OrderBook::process_event(events[i])) {
                 // If the order book deemed an event to be invalid, then we should probably
                 // ignore it in the trading engine too.
                 // 板がイベントを無効だと判断したら、取引処理エンジンには無視したほうがいいかもしれない。
-                trading_engine.process_event(events[i]);
+                TradingEngine::process_event(events[i]);
             }
 
             clock_end = std::chrono::steady_clock::now();

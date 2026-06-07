@@ -1,6 +1,6 @@
 #include "renderer.hpp"
 #include <array>
-#include <iostream>
+#include <print>
 #include <limits>
 #include <algorithm>
 #include <cmath>
@@ -25,7 +25,7 @@ void print_latency_percentiles(std::vector<std::vector<std::uint32_t>> performan
         p95 += run_data[std::roundl(run_data.size() * 0.95)];
         p99 += run_data[std::roundl(run_data.size() * 0.99)];
         p999 += run_data[std::roundl(run_data.size() * 0.999)];
-        p100 += run_data[std::roundl(run_data.size() - 1)];
+        p100 += run_data.back();
     }
 
     p0 /= performance_data.size();
@@ -39,15 +39,18 @@ void print_latency_percentiles(std::vector<std::vector<std::uint32_t>> performan
 
     // Print stats.
     // 統計情報を出力する。
-    std::cout << "===== Per-event latency percentiles =====\n"
-        << "P0: " << p0 << "ns\n"
-        << "P50: " << p50 << "ns\n"
-        << "P75: " << p75 << "ns\n"
-        << "P90: " << p90 << "ns\n"
-        << "P95: " << p95 << "ns\n"
-        << "P99: " << p99 << "ns\n"
-        << "P99.9: " << p999 << "ns\n"
-        << "P100: " << p100 << "ns\n\n";
+    std::println(
+        "===== Per-event latency percentiles =====\n"
+        "P0: {}ns\n"
+        "P50: {}ns\n"
+        "P75: {}ns\n"
+        "P90: {}ns\n"
+        "P95: {}ns\n"
+        "P99: {}ns\n"
+        "P99.9: {}ns\n"
+        "P100: {}ns\n",
+        p0, p50, p75, p90, p95, p99, p999, p100
+    );
 }
 
 void print_latency_distribution(const std::vector<std::uint32_t>& flattened_p999_data) {
@@ -81,7 +84,7 @@ void print_latency_distribution(const std::vector<std::uint32_t>& flattened_p999
 
     // Print the frequency table.
     // 度数表を出力する。
-    std::cout << "===== P99.9 latency distribution =====\n";
+    std::println("===== P99.9 latency distribution =====");
 
     for (std::size_t i = 0; i < frequency_table.size(); ++i) {
         std::string label = std::to_string((i + 1) * frequency_table_increment_size) + "ns";
@@ -98,7 +101,7 @@ void print_latency_distribution(const std::vector<std::uint32_t>& flattened_p999
 
         std::string n = "(" + std::to_string(frequency_table[i]) + ")";
 
-        std::cout << label << " | " << bar << " | " << n << "\n";
+        std::println("{} | {} | {}", label, bar, n);
     }
 }
 
@@ -111,8 +114,11 @@ void print_stats(const std::vector<std::uint32_t>& flattened_p999_data) {
 
     double average = static_cast<double>(total) / flattened_p999_data.size();
 
-    std::cout << "===== Stats =====\n"
-        << "Average event time: " << average << "ns\n\n";
+    std::println(
+        "===== Stats =====\n"
+        "Average event time: {}ns\n",
+        average
+    );
 }
 
 std::vector<std::uint32_t>
@@ -159,7 +165,7 @@ get_flattened_p999_performance_data(std::vector<std::uint32_t> raw_flattened_per
 // shows the latency distribution.
 // さっき収集したレイテンシ性能のデータで、レイテンシ分布を示すために、コンソールでいい表を作ろう。
 void render_latency_chart(std::vector<std::vector<std::uint32_t>>& performance_data) {
-    std::cout << "\n";
+    std::println("");
 
     auto flattened_data = get_flattened_performance_data(performance_data);
     auto flattened_p999_data = get_flattened_p999_performance_data(flattened_data); 
