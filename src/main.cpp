@@ -29,10 +29,8 @@ std::vector<Event> duplicate_events_for_markets(const std::vector<Event>& events
 
     for (const auto& event : events) {
         for (int i = 0; i < MARKET_COUNT; ++i) {
-            auto new_event = event;
-            new_event.market = static_cast<OrderBookMarketType>(i);
-
-            output.emplace_back(new_event);
+            output.push_back(event);
+            output.back().market = static_cast<OrderBookMarketType>(i);
         }
     }
 
