@@ -45,7 +45,7 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 ## Recent Changes
 
 ### 15 October 2026
-- Fixed a bug where deleting sell order didn't update the share count correctly, and fix a bug where a partial execution was deleting the whole order. Think this was half caused by my negligence in not adding proper tests for these scenarios, as well as the fact that the readme that came with the sample data is a bit vague about which events are supposed to do what.
+- Fixed a bug where deleting sell order didn't update the share count correctly, and fix a bug where a partial execution was deleting the whole order. I think this was half caused by my negligence in not adding proper tests for these scenarios, and half caused by the fact that the readme that came with the sample data doesn't really explain which events are supposed to do what.
 - With the extra logic we see about a 0.4%-1% slowdown in general. Although interestingly P0 gets ~0.62% faster on average, and P99.9 becomes ~2.25% faster.
 
 ### 7 June 2026
