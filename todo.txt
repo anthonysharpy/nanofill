@@ -30,3 +30,5 @@ OrderBook::reset_market may cause a use after free because the allocator thread 
 Currently it's fine though because that function is only used for tests
 
 a failed test orderbook_test test fails all after it. can fix by resetting market at BEGINNING of tests?
+
+our level order data is using signed ints? do we need this?
