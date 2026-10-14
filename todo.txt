@@ -28,3 +28,5 @@ LevelPriceData::price is pointless to store because it's already known
 
 OrderBook::reset_market may cause a use after free because the allocator thread might still access it.
 Currently it's fine though because that function is only used for tests
+
+a failed test orderbook_test test fails all after it. can fix by resetting market at BEGINNING of tests?

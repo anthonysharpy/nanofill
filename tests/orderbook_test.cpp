@@ -64,6 +64,52 @@ TEST(OrderBook, ProcessSubmissionEvent) {
     OrderBook::reset_market(OrderBookMarketType::MICROSOFT);
 }
 
+TEST(OrderBook, DeleteSellOrder) {
+    Event event {
+        .price = 10,
+        .time = 100,
+        .order_id = 1000,
+        .size = 10,
+        .market = OrderBookMarketType::MICROSOFT,
+        .direction = TradeDirection::Negative,
+        .type = EventType::Submission
+    };
+
+    ASSERT_TRUE(OrderBook::process_event(event));
+
+    ASSERT_EQ(100U, OrderBook::get_last_modified_for_price(OrderBookMarketType::MICROSOFT, 10));
+    ASSERT_EQ(10U, OrderBook::get_total_order_size_for_price(OrderBookMarketType::MICROSOFT, 10));
+
+    auto order = OrderBook::get_order_by_id_and_price(OrderBookMarketType::MICROSOFT, 1000, 10);
+
+    ASSERT_EQ(OrderBook::get_order_count_for_price(OrderBookMarketType::MICROSOFT, 10), 1U);
+    ASSERT_EQ(order->price, 10U);
+    ASSERT_EQ(order->size, -10);
+    ASSERT_EQ(order->time, 100U);
+
+    // Delete it.
+    Event deletion_event {
+        .price = 10,
+        .time = 105,
+        .order_id = 1000,
+        .size = 10,
+        .market = OrderBookMarketType::MICROSOFT,
+        .direction = TradeDirection::Negative,
+        .type = EventType::Deletion
+    };
+
+    ASSERT_TRUE(OrderBook::process_event(deletion_event));
+
+    ASSERT_EQ(105U, OrderBook::get_last_modified_for_price(OrderBookMarketType::MICROSOFT, 10));
+    ASSERT_EQ(0U, OrderBook::get_total_order_size_for_price(OrderBookMarketType::MICROSOFT, 10));
+    ASSERT_EQ(OrderBook::get_order_count_for_price(OrderBookMarketType::MICROSOFT, 10), 0U);
+
+    order = OrderBook::get_order_by_id_and_price(OrderBookMarketType::MICROSOFT, 1000, 10);
+    ASSERT_EQ(order, nullptr);
+
+    OrderBook::reset_market(OrderBookMarketType::MICROSOFT);
+}
+
 TEST(OrderBook, ProcessBigSubmissionEvent) {
     Event event {
         .price = 10,
@@ -249,12 +295,28 @@ TEST(OrderBook, ProcessVisibleExecutionEvent) {
     };
 
     ASSERT_TRUE(OrderBook::process_event(submission_event));
+    ASSERT_FALSE(OrderBook::process_event(execution_event));
+
+
+    // Nothing changes because the execution event had a size of 0.
+    ASSERT_EQ(OrderBook::get_last_modified_for_price(OrderBookMarketType::MICROSOFT, 10), 100U);
+    ASSERT_EQ(OrderBook::get_total_order_size_for_price(OrderBookMarketType::MICROSOFT, 10), 10U);
+    ASSERT_EQ(OrderBook::get_order_count_for_price(OrderBookMarketType::MICROSOFT, 10), 1U);
+
+    execution_event.size = 5;
+
     ASSERT_TRUE(OrderBook::process_event(execution_event));
 
     ASSERT_EQ(OrderBook::get_last_modified_for_price(OrderBookMarketType::MICROSOFT, 10), 105U);
-    ASSERT_EQ(OrderBook::get_total_order_size_for_price(OrderBookMarketType::MICROSOFT, 10), 0U);
+    ASSERT_EQ(OrderBook::get_total_order_size_for_price(OrderBookMarketType::MICROSOFT, 10), 5U);
+    ASSERT_EQ(OrderBook::get_order_count_for_price(OrderBookMarketType::MICROSOFT, 10), 1U);
 
+    ASSERT_TRUE(OrderBook::process_event(execution_event));
+
+    ASSERT_EQ(OrderBook::get_total_order_size_for_price(OrderBookMarketType::MICROSOFT, 10), 0U);
     ASSERT_EQ(OrderBook::get_order_count_for_price(OrderBookMarketType::MICROSOFT, 10), 0U);
+
+    OrderBook::reset_market(OrderBookMarketType::MICROSOFT);
 }
 
 TEST(OrderBook, ProcessDeletionEvent) {

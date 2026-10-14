@@ -48,7 +48,7 @@ private:
             case EventType::Deletion:
                 return process_deletion_event(event);
             case EventType::ExecutionVisible:
-                return process_visible_execution_event(event);
+                return process_execution_event(event);
             case EventType::Cancellation:
                 return process_cancellation_event(event);
             default:
@@ -105,13 +105,6 @@ private:
         return remove_order(event);
     }
 
-    // An order we have on our order book has been executed.
-    // 板にある注文が実行された。
-    [[gnu::always_inline]]
-    bool process_visible_execution_event(const Event event) noexcept {
-        return remove_order(event);
-    }
-
     // We received a new order.
     // 新しい注文を受け取った。
     [[gnu::always_inline]]
@@ -131,7 +124,32 @@ private:
         }
 
         levels_last_modified[event.price] = event.time;
-        levels_size[event.price] -= size;
+        levels_size[event.price] -= std::abs(size);
+
+        return true;
+    }
+
+    // An order we have on our order book has been executed.
+    // 板にある注文が実行された。
+    [[gnu::always_inline]]
+    bool process_execution_event(const Event event) noexcept {
+        if (event.size == 0) return false;
+
+        auto size_ptr = levels_orders[event.price].get_event_size_by_order_id(event.order_id);
+
+        if (size_ptr == nullptr) {
+            return false;
+        }
+
+        if (event.size < std::abs(*size_ptr)) {
+            levels_size[event.price] -= event.size;
+            *size_ptr -= event.get_size_with_direction();
+            levels_last_modified[event.price] = event.time;
+        } else {
+            levels_orders[event.price].remove_order_by_id(event.order_id);
+            levels_last_modified[event.price] = event.time;
+            levels_size[event.price] -= event.size;
+        }
 
         return true;
     }
