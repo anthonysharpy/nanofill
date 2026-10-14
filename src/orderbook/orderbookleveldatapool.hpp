@@ -26,6 +26,21 @@ constexpr std::size_t DATA_POOL_SIZE = 48;
 
 alignas (std::hardware_destructive_interference_size) static inline concurrency::SPSCRingBuffer<OrderBookLevelDataPool*, DATA_POOL_GROWTH_BUFFER_SIZE> growth_buffer;
 
+// The location of an order in a data pool. 
+//
+// If pool is nullptr, then it should usually indicate that the order was not found.
+struct OrderIndex {
+    OrderBookLevelDataPool* pool;
+    std::size_t index;
+
+    OrderIndex(
+        OrderBookLevelDataPool* pool,
+        std::size_t index
+    ) : pool(pool), index(index) {}
+
+    OrderIndex() = default;
+};
+
 struct LevelPoolData
 {
     std::uint32_t price;
@@ -101,7 +116,49 @@ struct OrderBookLevelDataPool
             return std::numeric_limits<std::int32_t>::max();
         }
     }
+
+    [[gnu::always_inline]]
+    void remove_order_by_index(const OrderIndex index) noexcept {
+        index.pool->data[index.index] = index.pool->data[index.pool->size-1];
+        index.pool->order_ids[index.index] = index.pool->order_ids[index.pool->size-1];
+        
+        --index.pool->size;
+
+        // Prefer to write to older pools.
+        // 古いプールに書くのを優先する。
+        if (index.pool->created_at < next_pool_available_for_insert->created_at) {
+            next_pool_available_for_insert = index.pool;
+        }
+    }
     
+    [[gnu::always_inline]]
+    OrderIndex find_order_by_id(const std::uint32_t order_id) noexcept {
+        OrderIndex result = {};
+        OrderBookLevelDataPool* pool = this;
+
+        while (true) {
+            auto index = pool->find_order_id_in_pool(order_id);
+
+            if (index < pool->size) {
+                result.index = index;
+                result.pool = pool;
+                return result;
+            }
+
+            pool = pool->next.load(std::memory_order_acquire);
+
+            // Keep searching if we can.
+            // できれば、探しつづける。
+            if (pool) {
+                continue;
+            }
+
+            // The order doesn't exist.
+            // 注文は存在しない。
+            return result;
+        }
+    }
+
     // Get a pointer to the size of the order with the given id, or nullptr if it doesn't exist.
     // 指定されたIDの注文が存在する場合は、サイズのポインターを返し、存在しない場合は、nullptrを返す。
     [[gnu::always_inline]]

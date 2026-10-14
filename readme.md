@@ -44,6 +44,10 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 
 ## Recent Changes
 
+### 15 October 2026
+- Fixed a bug where deleting sell order didn't update the share count correctly, and fix a bug where a partial execution was deleting the whole order. Think this was half caused by my negligence in not adding proper tests for these scenarios, as well as the fact that the readme that came with the sample data is a bit vague about which events are supposed to do what.
+- With the extra logic we see about a 0.4%-1% slowdown in general. Although interestingly P0 gets ~0.62% faster on average, and P99.9 becomes ~2.25% faster.
+
 ### 7 June 2026
 - Add support for multiple markets as well as some other changes and improvements in latency (details below). P75-P99 has seen an average 20-26% speedup, P50 is ~10.7% faster and P0 is also about 1% faster on average.
 - Add support for multiple markets. Markets are configured and represented by an enum.
@@ -112,7 +116,7 @@ Example market data is from https://data.lobsterdata.com/info/DataStructure.php.
 - Record cache misses in profile data.
 
 ### 27 Mar 2026
-- Only use P999 data for calculating average event processing time in order to reduce noise during benchmarking. 
+- Only use P99.9 data for calculating average event processing time in order to reduce noise during benchmarking. 
 - Make buffer size a configurable value.
 - Reduce event processing time by ~2.5% by shrinking buffer size.
 - Reduce event processing time by ~1.6% by making event direction a larger type, preventing wasted CPU cycles on type widening.

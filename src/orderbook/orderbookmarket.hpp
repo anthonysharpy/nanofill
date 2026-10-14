@@ -133,20 +133,23 @@ private:
     // 板にある注文が実行された。
     [[gnu::always_inline]]
     bool process_execution_event(const Event event) noexcept {
-        if (event.size == 0) return false;
-
-        auto size_ptr = levels_orders[event.price].get_event_size_by_order_id(event.order_id);
-
-        if (size_ptr == nullptr) {
+        if (event.size == 0) {
             return false;
         }
 
-        if (event.size < std::abs(*size_ptr)) {
+        auto order = levels_orders[event.price].find_order_by_id(event.order_id);
+
+        if (order.pool == nullptr) {
+            return false;
+        }
+
+        if (event.size < std::abs(order.pool->data[order.index].size)) {
+            order.pool->data[order.index].size -= event.get_size_with_direction();
+
             levels_size[event.price] -= event.size;
-            *size_ptr -= event.get_size_with_direction();
             levels_last_modified[event.price] = event.time;
         } else {
-            levels_orders[event.price].remove_order_by_id(event.order_id);
+            levels_orders[event.price].remove_order_by_index(order);
             levels_last_modified[event.price] = event.time;
             levels_size[event.price] -= event.size;
         }
